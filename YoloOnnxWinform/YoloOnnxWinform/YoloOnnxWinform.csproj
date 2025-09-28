@@ -10,11 +10,12 @@
 
   <ItemGroup>
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.7" />
+    <PackageReference Include="SkiaSharp" Version="3.119.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CommImageControl\CommImageControl.csproj" />
-    <ProjectReference Include="..\YoloSharp\YoloSharp.csproj" />
+    <ProjectReference Include="..\YoloDotNet\YoloDotNet.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -7,7 +7,7 @@ public class YoloPredictorOptions
 #if USE_CUDA_DEFAULT
     public bool UseCuda { get; init; } = true;
 #else 
-    public bool UseCuda { get; init; }
+    public bool UseCuda { get; init; } = true;
 #endif
     public int CudaDeviceId { get; init; }
 
@@ -18,12 +18,12 @@ public class YoloPredictorOptions
     internal InferenceSession CreateSession(string path)
     {
         var sessionOptions = GetSessionOptions();
-        
+
         if (sessionOptions != null)
         {
             return new InferenceSession(path, sessionOptions);
         }
-
+       
         return new InferenceSession(path);
     }
 
@@ -47,8 +47,13 @@ public class YoloPredictorOptions
             {
                 throw new InvalidOperationException("'UseCuda' and 'SessionOptions' cannot be used together");
             }
-
-            return SessionOptions.MakeSessionOptionWithCudaProvider(CudaDeviceId);
+            SessionOptions sessionOptions = new SessionOptions();
+            sessionOptions.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+            sessionOptions.LogSeverityLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_VERBOSE; // 最详细日志
+            sessionOptions.LogVerbosityLevel = 3;
+            sessionOptions.AppendExecutionProvider_DML(1);
+            return sessionOptions;
+            //return SessionOptions.MakeSessionOptionWithCudaProvider(CudaDeviceId);
         }
 
         return SessionOptions;

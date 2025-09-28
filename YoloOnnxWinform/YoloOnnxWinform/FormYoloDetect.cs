@@ -1,8 +1,10 @@
 ﻿using CommImageControl;
-using Compunet.YoloSharp;
-using Compunet.YoloSharp.Plotting;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
+//using Compunet.YoloSharp;
+//using Compunet.YoloSharp.Plotting;
+using SkiaSharp;
+
+//using SixLabors.ImageSharp;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,6 +14,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YoloDotNet;
+using YoloDotNet.Core;
+using YoloDotNet.Enums;
+using YoloDotNet.Models;
+using YoloDotNet.Extensions;
+
 
 namespace YoloOnnxWinform
 {
@@ -22,7 +30,9 @@ namespace YoloOnnxWinform
         public DataGridView DataGridList => this.dataGridView1;
         private System.Diagnostics.Stopwatch _stopwatch = new System.Diagnostics.Stopwatch();
 
-        private YoloPredictor _yoloPredictor;
+        //private YoloPredictor _yoloPredictor;
+        private DetectionDrawingOptions _drawingOptions;
+        private Yolo yoloPredictor;
         public FormYoloDetect()
         {
             InitializeComponent();
@@ -31,7 +41,33 @@ namespace YoloOnnxWinform
 
         private void FormYoloDetect_Load(object sender, EventArgs e)
         {
-            _yoloPredictor = new YoloPredictor("yolo11n.onnx");
+            // _yoloPredictor = new YoloPredictor("yolo11n.onnx");
+
+            _drawingOptions = new DetectionDrawingOptions
+            {
+                DrawBoundingBoxes = true,
+                DrawConfidenceScore = true,
+                DrawLabels = true,
+                EnableFontShadow = true,
+
+                Font = SKTypeface.Default,
+
+                FontSize = 18,
+                FontColor = SKColors.White,
+                DrawLabelBackground = true,
+                EnableDynamicScaling = true,
+                BorderThickness = 2,
+
+                BoundingBoxOpacity = 128,
+
+            };
+            yoloPredictor = new Yolo(new YoloOptions
+            {
+                OnnxModel = "yolo11n.onnx",
+                ExecutionProvider = new CudaExecutionProvider(GpuId: 0, PrimeGpu: true),
+                ImageResize = ImageResize.Proportional,
+                SamplingOptions = new(SKFilterMode.Nearest, SKMipmapMode.None) // YoloDotNet default
+            });
         }
 
         private void btnSelectDir_Click(object sender, EventArgs e)
@@ -85,7 +121,7 @@ namespace YoloOnnxWinform
             this.progressBar1.Value = 0;
             Task.Run(() =>
             {
-                _viewPresenter.Process(_yoloPredictor);
+                _viewPresenter.Process(yoloPredictor);
             });
         }
 
@@ -182,26 +218,48 @@ namespace YoloOnnxWinform
                 var item = _viewPresenter.GetSelectRowData(row);
                 if (item != null)
                 {
-                    var result = _yoloPredictor.Detect(item.FilePath);
-                    using var image = SixLabors.ImageSharp.Image.Load(item.FilePath);
+                    //var result = _yoloPredictor.Detect(item.FilePath);
+                    //using var image = SixLabors.ImageSharp.Image.Load(item.FilePath);
 
-                    using var plot = result.PlotImage(image);
-                    if (plot != null)
+                    //using var plot = result.PlotImage(image);
+                    //if (plot != null)
+                    //{
+                    //    string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
+                    //    if (!Directory.Exists(folder))
+                    //    {
+                    //        Directory.CreateDirectory(folder);
+                    //    }
+                    //    string path = Path.Combine(folder, item.FileName);
+                    //    if (File.Exists(path))
+                    //    {
+                    //        File.Delete(path);
+                    //    }
+                    //    plot.Save(path);
+                    //    FormUtils.Show(item.FileName, path);
+                    //}
+
+                    using var image = SKBitmap.Decode(item.FilePath);
+
+                    // Run object detection inference
+                    var results = yoloPredictor.RunObjectDetection(image, confidence: 0.15, iou: 0.7);
+
+                    // Draw results
+                    image.Draw(results, _drawingOptions);
+
+                    string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
+                    if (!Directory.Exists(folder))
                     {
-                        string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
-                        if (!Directory.Exists(folder))
-                        {
-                            Directory.CreateDirectory(folder);
-                        }
-                        string path = Path.Combine(folder, item.FileName);
-                        if (File.Exists(path))
-                        {
-                            File.Delete(path);
-                        }
-                        plot.Save(path);
-                        FormUtils.Show(item.FileName, path);
+                        Directory.CreateDirectory(folder);
+                    }
+                    string path = Path.Combine(folder, item.FileName);
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
                     }
 
+                    // Save image
+                    image.Save(path, SKEncodedImageFormat.Jpeg, 80);
+                    FormUtils.Show(item.FileName, path);
                 }
             }
             catch (Exception ex)
@@ -216,38 +274,7 @@ namespace YoloOnnxWinform
 
         }
 
-        /// <summary>
-        /// 将ImageSharp图像转换为字节数组
-        /// </summary>
-        /// <param name="image">要转换的图像</param>
-        /// <param name="format">图像格式（如JPEG、PNG等）</param>
-        /// <returns>图像的字节数组</returns>
-        public static byte[] ToByteArray(SixLabors.ImageSharp.Image image, IImageEncoder format)
-        {
-            if (image == null)
-                throw new ArgumentNullException(nameof(image));
 
-            if (format == null)
-                throw new ArgumentNullException(nameof(format));
-
-            using (var stream = new MemoryStream())
-            {
-                // 保存图像到内存流
-                image.Save(stream, format);
-
-                // 将内存流内容转换为字节数组
-                return stream.ToArray();
-            }
-        }
-
-        private IImageEncoder GetImageFormat(string fileName)
-        {
-            if (System.IO.Path.GetExtension(fileName).ToLower().Trim() == "png")
-            {
-                return new SixLabors.ImageSharp.Formats.Png.PngEncoder();
-            }
-            return new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder();
-        }
 
 
 
@@ -260,10 +287,10 @@ namespace YoloOnnxWinform
                 return;
             }
 
-            if (_yoloPredictor != null)
-            {
-                _yoloPredictor.Dispose();
-            }
+            //if (_yoloPredictor != null)
+            //{
+            //    _yoloPredictor.Dispose();
+            //}
         }
     }
 }

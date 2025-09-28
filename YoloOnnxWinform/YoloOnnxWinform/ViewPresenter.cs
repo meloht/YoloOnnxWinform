@@ -1,4 +1,6 @@
-﻿using Compunet.YoloSharp;
+﻿//using Compunet.YoloSharp;
+//using Compunet.YoloSharp;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,12 +8,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YoloDotNet;
 
 namespace YoloOnnxWinform
 {
     public class ViewPresenter
     {
         IFormProgress _formProgress;
+        
 
         protected BindingList<DataModel> _bindingSource = new BindingList<DataModel>();
         protected Dictionary<string, string> _dictFile = [];
@@ -63,7 +67,7 @@ namespace YoloOnnxWinform
 
         }
 
-        public void Process(YoloPredictor yoloPredictor)
+        public void Process(Yolo yoloPredictor)
         {
             int idx = 0;
             int total = _bindingSource.Count;
@@ -110,13 +114,15 @@ namespace YoloOnnxWinform
             _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");
         }
 
-        private DataModel GetDetectResult(YoloPredictor yoloPredictor, string filePath)
+        private DataModel GetDetectResult(Yolo yoloPredictor, string filePath)
         {
             DataModel model = new DataModel();
+           
             _stopwatch.Start();
-            var data = yoloPredictor.Detect(filePath);
+            using var image = SKBitmap.Decode(filePath);
+            var data = yoloPredictor.RunObjectDetection(image, confidence: 0.35, iou: 0.7);
             _stopwatch.Stop();
-            model.DetectionResult = data.ToString();
+            model.DetectionResult = data.Count.ToString();
             model.ExecuteTime = $"{_stopwatch.Elapsed.TotalMilliseconds}ms";
             _stopwatch.Reset();
             return model;
