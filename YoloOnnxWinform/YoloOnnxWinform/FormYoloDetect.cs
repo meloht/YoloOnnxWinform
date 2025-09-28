@@ -1,6 +1,7 @@
 ﻿using CommImageControl;
 using Compunet.YoloSharp;
 using Compunet.YoloSharp.Plotting;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using System;
 using System.Collections.Generic;
@@ -174,6 +175,7 @@ namespace YoloOnnxWinform
                 return;
             }
             showImageToolStripMenuItem.Enabled = false;
+
             try
             {
                 var row = this.dataGridView1.SelectedRows[0];
@@ -182,11 +184,22 @@ namespace YoloOnnxWinform
                 {
                     var result = _yoloPredictor.Detect(item.FilePath);
                     using var image = SixLabors.ImageSharp.Image.Load(item.FilePath);
-                    var imageResult = result.PlotImage(image);
-                    if (imageResult != null)
+
+                    using var plot = result.PlotImage(image);
+                    if (plot != null)
                     {
-                        var dataBytes = ToByteArray(imageResult, GetImageFormat(item.FileName));
-                        FormUtils.Show(item.FileName, dataBytes);
+                        string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
+                        if (!Directory.Exists(folder))
+                        {
+                            Directory.CreateDirectory(folder);
+                        }
+                        string path = Path.Combine(folder, item.FileName);
+                        if (File.Exists(path))
+                        {
+                            File.Delete(path);
+                        }
+                        plot.Save(path);
+                        FormUtils.Show(item.FileName, path);
                     }
 
                 }
@@ -195,7 +208,12 @@ namespace YoloOnnxWinform
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            showImageToolStripMenuItem.Enabled = true;
+            finally
+            {
+                showImageToolStripMenuItem.Enabled = true;
+
+            }
+
         }
 
         /// <summary>

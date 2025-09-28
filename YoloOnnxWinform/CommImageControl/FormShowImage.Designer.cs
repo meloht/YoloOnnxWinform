@@ -109,6 +109,7 @@
             Controls.Add(toolStrip1);
             Name = "FormShowImage";
             Text = "FormShowImage";
+            FormClosed += FormShowImage_FormClosed;
             SizeChanged += FormShowImage_SizeChanged;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             toolStrip1.ResumeLayout(false);

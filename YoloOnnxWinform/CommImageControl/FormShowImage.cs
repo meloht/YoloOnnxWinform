@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,11 +16,12 @@ namespace CommImageControl
     public partial class FormShowImage : Form
     {
         private bool isImage = false;
-        public FormShowImage(string fileName, byte[] imgData)
+        private string _filePath;
+        public FormShowImage(string fileName, string filePath)
         {
 
             InitializeComponent();
-
+            _filePath = filePath;
             this.DoubleBuffered = true;
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer |
                           ControlStyles.AllPaintingInWmPaint |
@@ -29,13 +31,10 @@ namespace CommImageControl
             this.Text = fileName;
             isImage = false;
 
-            if (imgData != null && imgData.Length > 0)
+            if (filePath != null && filePath.Length > 0)
             {
-                using (MemoryStream memoryStream = new MemoryStream(imgData))
-                {
-                    isImage = true;
-                    this.pictureBox1.Image = Image.FromStream(memoryStream);
-                }
+                isImage = true;
+                this.pictureBox1.Image = Image.FromFile(filePath);
             }
         }
 
@@ -74,5 +73,19 @@ namespace CommImageControl
         }
 
 
+
+        private void FormShowImage_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (this.pictureBox1.Image != null)
+            {
+                this.pictureBox1.Image.Dispose();
+                this.pictureBox1.Image = null;
+                if (!string.IsNullOrEmpty(_filePath) && File.Exists(_filePath))
+                {
+                    File.Delete(_filePath);
+                }
+            }
+           
+        }
     }
 }
