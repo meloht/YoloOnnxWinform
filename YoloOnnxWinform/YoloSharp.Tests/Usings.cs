@@ -1,0 +1,9 @@
+global using Compunet.YoloSharp;
+global using Compunet.YoloSharp.Metadata;
+global using Compunet.YoloSharp.Parsers.Base;
+global using Compunet.YoloSharp.Services;
+global using SixLabors.ImageSharp;
+global using System.ComponentModel;
+global using System.Diagnostics;
+global using System.Reflection;
+global using Xunit;
