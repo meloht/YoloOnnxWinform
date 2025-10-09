@@ -1,14 +1,18 @@
 ﻿//using Compunet.YoloSharp;
 //using Compunet.YoloSharp;
+using Compunet.YoloSharp;
+using Compunet.YoloSharp.Data;
+
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YoloDotNet;
+//using YoloDotNet;
 
 namespace YoloOnnxWinform
 {
@@ -67,7 +71,7 @@ namespace YoloOnnxWinform
 
         }
 
-        public void Process(Yolo yoloPredictor)
+        public void Process(YoloPredictor yoloPredictor)
         {
             int idx = 0;
             int total = _bindingSource.Count;
@@ -88,6 +92,7 @@ namespace YoloOnnxWinform
                 {
                     string filePath = _dictFile[item.FileName];
                     DataModel viewModel = GetDetectResult(yoloPredictor, filePath);
+                    //DataModel viewModel = GetDetectResult(_yoloPredictor, filePath);
                     var span = DateTime.Now - current;
                     if (span.TotalMilliseconds > 300)
                     {
@@ -114,15 +119,29 @@ namespace YoloOnnxWinform
             _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");
         }
 
-        private DataModel GetDetectResult(Yolo yoloPredictor, string filePath)
+        //private DataModel GetDetectResult(Yolo yoloPredictor, string filePath)
+        //{
+        //    DataModel model = new DataModel();
+
+        //    _stopwatch.Start();
+        //    using var image = SKBitmap.Decode(filePath);
+        //    var data = yoloPredictor.RunObjectDetection(image, confidence: 0.30, iou: 0.7);
+        //    _stopwatch.Stop();
+        //    model.DetectionResult = data.Count.ToString();
+        //    model.ExecuteTime = $"{_stopwatch.Elapsed.TotalMilliseconds}ms";
+        //    _stopwatch.Reset();
+        //    return model;
+        //}
+
+        private DataModel GetDetectResult(YoloPredictor yoloPredictor, string filePath)
         {
             DataModel model = new DataModel();
-           
+
             _stopwatch.Start();
-            using var image = SKBitmap.Decode(filePath);
-            var data = yoloPredictor.RunObjectDetection(image, confidence: 0.35, iou: 0.7);
+          
+            var data = yoloPredictor.Detect(filePath);
             _stopwatch.Stop();
-            model.DetectionResult = data.Count.ToString();
+            model.DetectionResult = data.ToString();
             model.ExecuteTime = $"{_stopwatch.Elapsed.TotalMilliseconds}ms";
             _stopwatch.Reset();
             return model;

@@ -7,7 +7,7 @@ public class YoloPredictorOptions
 #if USE_CUDA_DEFAULT
     public bool UseCuda { get; init; } = true;
 #else 
-    public bool UseCuda { get; init; } = true;
+    public bool UseCuda { get; init; }
 #endif
     public int CudaDeviceId { get; init; }
 
@@ -39,6 +39,16 @@ public class YoloPredictorOptions
         return new InferenceSession(model);
     }
 
+    //private SessionOptions? GetSessionOptions()
+    //{
+    //    SessionOptions sessionOptions = new SessionOptions();
+    //    sessionOptions.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+    //    sessionOptions.LogSeverityLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_VERBOSE; // 最详细日志
+    //    sessionOptions.LogVerbosityLevel = 3;
+    //    sessionOptions.AppendExecutionProvider_DML(0);
+    //    return sessionOptions;
+    //}
+
     private SessionOptions? GetSessionOptions()
     {
         if (UseCuda)
@@ -47,13 +57,8 @@ public class YoloPredictorOptions
             {
                 throw new InvalidOperationException("'UseCuda' and 'SessionOptions' cannot be used together");
             }
-            SessionOptions sessionOptions = new SessionOptions();
-            sessionOptions.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
-            sessionOptions.LogSeverityLevel = OrtLoggingLevel.ORT_LOGGING_LEVEL_VERBOSE; // 最详细日志
-            sessionOptions.LogVerbosityLevel = 3;
-            sessionOptions.AppendExecutionProvider_DML(1);
-            return sessionOptions;
-            //return SessionOptions.MakeSessionOptionWithCudaProvider(CudaDeviceId);
+
+            return SessionOptions.MakeSessionOptionWithCudaProvider(CudaDeviceId);
         }
 
         return SessionOptions;

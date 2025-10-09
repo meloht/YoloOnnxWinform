@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormYoloDetect));
             panel1 = new Panel();
             lblTimeCost = new Label();
             btnAly = new Button();
@@ -68,7 +69,7 @@
             // 
             lblTimeCost.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lblTimeCost.AutoSize = true;
-            lblTimeCost.Location = new Point(963, 17);
+            lblTimeCost.Location = new Point(998, 17);
             lblTimeCost.Margin = new Padding(2, 0, 2, 0);
             lblTimeCost.Name = "lblTimeCost";
             lblTimeCost.Size = new Size(80, 17);
@@ -81,7 +82,7 @@
             btnAly.Location = new Point(766, 13);
             btnAly.Margin = new Padding(2, 3, 2, 3);
             btnAly.Name = "btnAly";
-            btnAly.Size = new Size(73, 26);
+            btnAly.Size = new Size(109, 26);
             btnAly.TabIndex = 3;
             btnAly.Text = "Analyse";
             btnAly.UseVisualStyleBackColor = true;
@@ -91,7 +92,7 @@
             // 
             label1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             label1.AutoSize = true;
-            label1.Location = new Point(844, 17);
+            label1.Location = new Point(879, 17);
             label1.Margin = new Padding(2, 0, 2, 0);
             label1.Name = "label1";
             label1.Size = new Size(117, 17);
@@ -203,9 +204,10 @@
             Controls.Add(groupBox1);
             Controls.Add(panel2);
             Controls.Add(panel1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(2, 3, 2, 3);
             Name = "FormYoloDetect";
-            Text = "FormYoloDetect";
+            Text = "FormYoloDetect CPU-based inference";
             FormClosing += FormYoloDetect_FormClosing;
             Load += FormYoloDetect_Load;
             panel1.ResumeLayout(false);

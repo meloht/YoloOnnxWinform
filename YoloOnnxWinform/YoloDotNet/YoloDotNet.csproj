@@ -29,21 +29,11 @@ Segmentation inference just got leaner and meaner — CPU inference is up to 11%
 OrtEnv fix in 3.1.1:
 Reusing or recreating YoloDotNet objects? No more "OrtEnv singleton instance already exists" drama.</PackageReleaseNotes>
     <Copyright>Copyright © 2023 Nick Swardh</Copyright>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="D:\Documents\Yolodotnet Icon\icon.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.18.1" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.16.3" />
     <PackageReference Include="SkiaSharp" Version="3.119.1" />
   </ItemGroup>
 
