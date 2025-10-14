@@ -21,6 +21,7 @@ namespace CommImageControl
         {
 
             InitializeComponent();
+            this.pictureBox1.MouseWheel += PictureBox1_MouseWheel;
             _filePath = filePath;
             this.DoubleBuffered = true;
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer |
@@ -35,6 +36,18 @@ namespace CommImageControl
             {
                 isImage = true;
                 this.pictureBox1.Image = Image.FromFile(filePath);
+            }
+        }
+
+        private void PictureBox1_MouseWheel(object? sender, MouseEventArgs e)
+        {
+            if (e.Delta > 0)
+            {
+                toolStripBtnZoomIn_Click(null, null);
+            }
+            else
+            {
+                toolStripBtnZoomOut_Click(null, null);
             }
         }
 
