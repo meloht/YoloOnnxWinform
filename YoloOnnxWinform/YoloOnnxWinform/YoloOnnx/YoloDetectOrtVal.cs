@@ -20,7 +20,7 @@ namespace YoloOnnxWinform.YoloOnnx
         private readonly float _iouThres;
         private readonly LabelModel[] Labels;
         private readonly string InputName;
-        private readonly Scalar _paddingColor;
+      
         private InferenceSession _session;
 
         private readonly int _channels;
@@ -43,7 +43,7 @@ namespace YoloOnnxWinform.YoloOnnx
             };
             options.EnableCpuMemArena = true;
             _session = new InferenceSession(onnxModelPath, options);
-            Labels = MapLabelsAndColors();
+            Labels = MapLabelsAndColors(_session);
             var inputMeta = _session.InputMetadata.First();
             InputName = _session.InputNames[0];
 
@@ -61,7 +61,7 @@ namespace YoloOnnxWinform.YoloOnnx
             var _ortIoBinding = _session.CreateIoBinding();
 
             _colorPalette = GenerateColorPalette(Labels.Length);
-            _paddingColor = new Scalar(114, 114, 114);
+           
 
             InputShape = new long[]
               {
@@ -73,24 +73,7 @@ namespace YoloOnnxWinform.YoloOnnx
         }
 
       
-        private LabelModel[] MapLabelsAndColors()
-        {
-            var metaData = _session.ModelMetadata.CustomMetadataMap;
-            var onnxLabelData = metaData["names"];
-            // Labels to Dictionary
-            var onnxLabels = onnxLabelData
-                .Trim('{', '}')
-                .Replace("'", "")
-                .Split(", ")
-                .Select(x => x.Split(": "))
-                .ToDictionary(x => int.Parse(x[0]), x => x[1]);
 
-            return [.. onnxLabels!.Select((label, index) => new LabelModel
-            {
-                Index = index,
-                Name = label.Value,
-            })];
-        }
         private List<Output> GetOutputShapes()
         {
             var metaData = _session.OutputMetadata;

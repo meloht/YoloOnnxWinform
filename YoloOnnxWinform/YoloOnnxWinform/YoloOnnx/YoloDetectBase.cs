@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using Microsoft.ML.OnnxRuntime;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,30 @@ namespace YoloOnnxWinform.YoloOnnx
         protected Scalar[] _colorPalette;
         protected int InputWidth;
         protected int InputHeight;
+        protected readonly Scalar _paddingColor;
 
+        public YoloDetectBase()
+        {
+            _paddingColor = new Scalar(114, 114, 114);
+        }
+        protected LabelModel[] MapLabelsAndColors(InferenceSession session)
+        {
+            var metaData = session.ModelMetadata.CustomMetadataMap;
+            var onnxLabelData = metaData["names"];
+            // Labels to Dictionary
+            var onnxLabels = onnxLabelData
+                .Trim('{', '}')
+                .Replace("'", "")
+                .Split(", ")
+                .Select(x => x.Split(": "))
+                .ToDictionary(x => int.Parse(x[0]), x => x[1]);
 
+            return [.. onnxLabels!.Select((label, index) => new LabelModel
+            {
+                Index = index,
+                Name = label.Value,
+            })];
+        }
         protected Scalar[] GenerateColorPalette(int count)
         {
             var rng = new Random();
@@ -106,7 +129,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 left: padW,       // 左侧填充
                 right: InputWidth - newImgW - padW,  // 右侧填充（补全到 1280）
                 borderType: BorderTypes.Constant,
-                value: new Scalar(114, 114, 114) // 填充色（BGR 格式）
+                value: _paddingColor // 填充色（BGR 格式）
             );
             resizedImg.Dispose();
             // 关键检查：确保填充后尺寸严格为 1280×1280

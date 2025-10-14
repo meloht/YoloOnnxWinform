@@ -18,21 +18,19 @@ namespace YoloOnnxWinform.YoloOnnx
         public readonly string _onnxModelPath;
         private readonly float _confidenceThres;
         private readonly float _iouThres;
-        private readonly List<string> _classes;
-       
+        private readonly LabelModel[] Labels;
+
         private InferenceSession session;
         private bool disposedValue;
-        private static readonly List<string> CocoClasses = ["blackdot"];
-
 
         public YoloDetect(string onnxModelPath, float confidenceThres, float iouThres)
         {
             _onnxModelPath = onnxModelPath;
             _confidenceThres = confidenceThres;
             _iouThres = iouThres;
-            _classes = CocoClasses;
-            _colorPalette = GenerateColorPalette(_classes.Count);
             session = new InferenceSession(onnxModelPath);
+            Labels = MapLabelsAndColors(session);
+            _colorPalette = GenerateColorPalette(Labels.Length);
             var inputMeta = session.InputMetadata.First().Value;
             var inputDims = inputMeta.Dimensions;
             InputHeight = inputDims[2];
@@ -206,7 +204,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 Detection detection = new Detection();
                 detection.Confidence = scores[idx];
                 detection.ClassId = class_ids[idx];
-                detection.ClassName = _classes[detection.ClassId];
+                detection.ClassName = this.Labels[detection.ClassId].Name;
                 detection.Box = boxes[idx];
                 results.Add(detection);
             }
@@ -216,12 +214,8 @@ namespace YoloOnnxWinform.YoloOnnx
 
         public List<Detection> Run(Mat inputImage)
         {
-
             var inputMeta = session.InputMetadata.First().Value;
             var inputDims = inputMeta.Dimensions;
-
-
-   
 
             int imageHeight = inputImage.Rows;
             int imageWidth = inputImage.Cols;
