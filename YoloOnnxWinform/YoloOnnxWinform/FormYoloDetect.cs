@@ -10,9 +10,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using YoloOnnxWinform.YoloWarpper;
 
-
-
-
 namespace YoloOnnxWinform
 {
     public partial class FormYoloDetect : Form, IFormProgress
