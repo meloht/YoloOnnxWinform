@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YoloOnnxWinform
+namespace YoloOnnxWinform.YoloOnnx
 {
     public class Detection
     {

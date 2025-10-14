@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using static System.Collections.Specialized.BitVector32;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace YoloOnnxWinform
+namespace YoloOnnxWinform.YoloOnnx
 {
     public class YoloDetect : IDisposable
     {
@@ -57,8 +57,8 @@ namespace YoloOnnxWinform
         public void DrawDetections(Mat img, Rect box, float score, int classId)
         {
             var color = _colorPalette[classId];
-            var topLeft = new OpenCvSharp.Point((int)box.X, (int)box.Y);
-            var bottomRight = new OpenCvSharp.Point((int)(box.X + box.Width), (int)(box.Y + box.Height));
+            var topLeft = new OpenCvSharp.Point(box.X, box.Y);
+            var bottomRight = new OpenCvSharp.Point(box.X + box.Width, box.Y + box.Height);
 
             double fontScale = 0.7;
             // 绘制边界框
@@ -67,10 +67,10 @@ namespace YoloOnnxWinform
             // 绘制标签
             string label = $"{_classes[classId]}: {score:F2}";
             var textSize = Cv2.GetTextSize(label, HersheyFonts.HersheySimplex, fontScale, 1, out int baseline);
-            var labelTop = new OpenCvSharp.Point((int)box.X, (int)box.Y - 10);
+            var labelTop = new OpenCvSharp.Point(box.X, box.Y - 10);
 
             if (labelTop.Y < textSize.Height)
-                labelTop.Y = (int)box.Y + 10;
+                labelTop.Y = box.Y + 10;
 
             // 标签背景
             Cv2.Rectangle(img,
@@ -121,7 +121,7 @@ namespace YoloOnnxWinform
                 borderType: BorderTypes.Constant,
                 value: new Scalar(114, 114, 114) // 填充色（BGR 格式）
             );
-
+            resizedImg.Dispose();
             // 关键检查：确保填充后尺寸严格为 1280×1280
             if (letterboxImg.Rows != InputHeight || letterboxImg.Cols != InputWidth)
             {
@@ -133,7 +133,7 @@ namespace YoloOnnxWinform
         private (float[] data, int topPad, int leftPad) Preprocess(Mat inputImage, int imageHeight, int imageWidth)
         {
             // BGR转RGB
-            Mat rgbImg = new Mat();
+            using Mat rgbImg = new Mat();
 
             Cv2.CvtColor(inputImage, rgbImg, ColorConversionCodes.BGR2RGB);
 
@@ -151,11 +151,15 @@ namespace YoloOnnxWinform
             foreach (var channel in channels)
             {
                 float[] channelData = new float[channel.Rows * channel.Cols];
-                channel.GetArray<float>(out channelData);
+                channel.GetArray(out channelData);
                 Array.Copy(channelData, 0, data, index, channelData.Length);
                 index += channelData.Length;
             }
-
+            foreach (var item in channels)
+            {
+                item.Dispose();
+            }
+            paddedImg.Dispose();
             // 添加批次维度 (1, 3, H, W)
             return (data, topPad, leftPad);
         }
@@ -344,8 +348,8 @@ namespace YoloOnnxWinform
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
-                this.session.Dispose();
-                this.session = null;
+                session.Dispose();
+                session = null;
                 disposedValue = true;
             }
         }

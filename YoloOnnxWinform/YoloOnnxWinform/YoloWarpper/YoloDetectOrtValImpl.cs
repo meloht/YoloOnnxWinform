@@ -1,7 +1,6 @@
 ﻿using OpenCvSharp;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,18 +8,18 @@ using YoloOnnxWinform.YoloOnnx;
 
 namespace YoloOnnxWinform.YoloWarpper
 {
-    public class YoloDetectImpl : IYoloModel
+    public class YoloDetectOrtValImpl : IYoloModel
     {
-        private YoloDetect yoloPredictor;
+        private YoloDetectOrtVal yoloPredictor;
         public DataModel DetectImage(string imgPath)
         {
             DataModel model = new DataModel();
 
             using Mat inputImage = Cv2.ImRead(imgPath);
             var data = yoloPredictor.Run(inputImage);
-        
+
             model.DetectionResult = data.Count.ToString();
-          
+
             return model;
         }
 
@@ -31,7 +30,7 @@ namespace YoloOnnxWinform.YoloWarpper
 
         public void LoadModel(string modelPath, float confidence, float iou)
         {
-            yoloPredictor = new YoloDetect(modelPath, confidence, iou);
+            yoloPredictor = new YoloDetectOrtVal(modelPath, confidence, iou);
         }
 
         public string SaveImage(FileRowItem item)

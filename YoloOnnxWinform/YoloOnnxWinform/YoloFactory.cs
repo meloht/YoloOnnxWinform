@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YoloOnnxWinform.YoloOnnx;
 using YoloOnnxWinform.YoloWarpper;
 
 namespace YoloOnnxWinform
@@ -11,7 +12,8 @@ namespace YoloOnnxWinform
     {
         YoloSharp,
         YoloDotNet,
-        YoloDetect
+        YoloDetect,
+        YoloDetectOrt
     }
     public static class YoloFactory
     {
@@ -26,6 +28,8 @@ namespace YoloOnnxWinform
                     return new YoloDotNetImpl();
                 case YoloWarpperType.YoloDetect:
                     return new YoloDetectImpl();
+                case YoloWarpperType.YoloDetectOrt:
+                    return new YoloDetectOrtValImpl();
                 default:
                     return new YoloDetectImpl();
             }
