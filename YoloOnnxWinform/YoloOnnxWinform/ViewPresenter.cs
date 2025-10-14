@@ -1,13 +1,7 @@
-﻿//using Compunet.YoloSharp;
-//using Compunet.YoloSharp;
-//using Compunet.YoloSharp;
-//using Compunet.YoloSharp.Data;
+﻿
 
-using Compunet.YoloSharp;
-using Microsoft.ML.OnnxRuntime;
+
 using OpenCvSharp;
-using SixLabors.ImageSharp.Drawing;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,8 +10,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YoloDotNet;
-using YoloDotNet;
+
 
 namespace YoloOnnxWinform
 {

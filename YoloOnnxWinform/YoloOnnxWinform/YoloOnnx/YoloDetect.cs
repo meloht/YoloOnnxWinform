@@ -1,18 +1,15 @@
 ﻿
-using Compunet.YoloSharp;
-using Compunet.YoloSharp.Data;
+
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using OpenCvSharp;
 using OpenCvSharp.Dnn;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace YoloOnnxWinform.YoloOnnx
 {
@@ -129,7 +126,7 @@ namespace YoloOnnxWinform.YoloOnnx
             }
         }
 
-        private List<Detection> Postprocess(Mat inputImage, Tensor<float> outputTensor, int topPad, int leftPad)
+        private List<Detection> Postprocess(Mat inputImage, Microsoft.ML.OnnxRuntime.Tensors.Tensor<float> outputTensor, int topPad, int leftPad)
         {
             int imageHeight = inputImage.Rows;
             int imageWidth = inputImage.Cols;
