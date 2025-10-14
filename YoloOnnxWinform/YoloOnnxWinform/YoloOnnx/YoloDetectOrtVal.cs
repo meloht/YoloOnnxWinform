@@ -210,13 +210,7 @@ namespace YoloOnnxWinform.YoloOnnx
         private List<Detection> Postprocess(Mat inputImage, OrtValue ortTensor, int padTop, int padLeft)
         {
             var ortSpan = ortTensor.GetTensorDataAsSpan<float>();
-
-
-            var tensorTypeAndShape = ortTensor.GetTensorTypeAndShape();
-            long[] dimensions = tensorTypeAndShape.Shape;
-            int numDetections = (int)dimensions[1]; // 检测总数 N
-            int elementsPerDetection = (int)dimensions[2]; // 每个检测的元素数（如6）
-
+         
             int imageHeight = inputImage.Height;
             int imageWidth = inputImage.Width;
             List<Rect> boxes = new List<Rect>();
