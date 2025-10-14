@@ -79,9 +79,10 @@ namespace YoloOnnxWinform.YoloOnnx
         {
             var rng = new Random();
             var palette = new Scalar[count];
+            var colors = ColorTemplate.Get();
             for (int i = 0; i < count; i++)
             {
-                palette[i] = new Scalar(rng.Next(0, 256), rng.Next(0, 256), rng.Next(0, 256));
+                palette[i] = ColorTemplate.HexToRgbaScalar(colors[i % count]);
             }
             return palette;
         }
@@ -210,7 +211,7 @@ namespace YoloOnnxWinform.YoloOnnx
         private List<Detection> Postprocess(Mat inputImage, OrtValue ortTensor, int padTop, int padLeft)
         {
             var ortSpan = ortTensor.GetTensorDataAsSpan<float>();
-         
+
             int imageHeight = inputImage.Height;
             int imageWidth = inputImage.Width;
             List<Rect> boxes = new List<Rect>();

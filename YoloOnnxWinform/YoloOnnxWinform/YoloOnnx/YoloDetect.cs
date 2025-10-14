@@ -43,9 +43,13 @@ namespace YoloOnnxWinform.YoloOnnx
         private Scalar[] GenerateColorPalette(int count)
         {
             var rng = new Random();
-            return Enumerable.Range(0, count)
-                .Select(_ => new Scalar(rng.Next(0, 256), rng.Next(0, 256), rng.Next(0, 256)))
-                .ToArray();
+            var palette = new Scalar[count];
+            var colors = ColorTemplate.Get();
+            for (int i = 0; i < count; i++)
+            {
+                palette[i] = ColorTemplate.HexToRgbaScalar(colors[i % count]);
+            }
+            return palette;
         }
         public void DrawDetections(Mat inputImage, List<Detection> list)
         {
