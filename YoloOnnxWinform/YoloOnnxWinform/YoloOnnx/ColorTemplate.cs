@@ -22,6 +22,7 @@ namespace YoloOnnxWinform.YoloOnnx
         {
             return
             [
+                "#FF3838",
                 "#91FF57", // Electric Lemon-Lime
                 "#FF6F00", // Manic Tangerine Tango
                 "#FF63A5", // Rambunctious Bubblegum Bliss
