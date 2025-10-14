@@ -10,12 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.11.0.20250507" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.11.0.20250507" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.7" />
     <PackageReference Include="SkiaSharp" Version="3.119.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CommImageControl\CommImageControl.csproj" />
+    <ProjectReference Include="..\YoloDotNet\YoloDotNet.csproj" />
     <ProjectReference Include="..\YoloSharp\YoloSharp.csproj" />
   </ItemGroup>
 

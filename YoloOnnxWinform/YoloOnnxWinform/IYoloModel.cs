@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace YoloOnnxWinform
 {
-    public interface IYoloModel
+    public interface IYoloModel : IDisposable
     {
-        
+        void LoadModel(string modelPath, float confidence, float iou);
+        string SaveImage(FileRowItem item);
+        DataModel DetectImage(string imgPath);
     }
 }

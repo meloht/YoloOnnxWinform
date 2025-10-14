@@ -1,9 +1,4 @@
 ﻿using CommImageControl;
-
-using SkiaSharp;
-
-using SixLabors.ImageSharp;
-//using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,14 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-//using YoloDotNet;
-//using YoloDotNet.Core;
-//using YoloDotNet.Enums;
-//using YoloDotNet.Models;
-//using YoloDotNet.Extensions;
+using YoloOnnxWinform.YoloWarpper;
 
-using Compunet.YoloSharp;
-using Compunet.YoloSharp.Plotting;
 
 
 
@@ -33,46 +22,19 @@ namespace YoloOnnxWinform
         public DataGridView DataGridList => this.dataGridView1;
         private System.Diagnostics.Stopwatch _stopwatch = new System.Diagnostics.Stopwatch();
 
-        private YoloPredictor _yoloPredictor;
-        //private DetectionDrawingOptions _drawingOptions;
-        //private Yolo yoloPredictor;
+        private IYoloModel _yoloPredictor;
+
         public FormYoloDetect()
         {
             InitializeComponent();
             _viewPresenter = new ViewPresenter(this);
+            _yoloPredictor = YoloFactory.Create(YoloWarpperType.YoloDetect);
         }
 
         private void FormYoloDetect_Load(object sender, EventArgs e)
         {
-            _yoloPredictor = new YoloPredictor("best.onnx");
-            _yoloPredictor.Configuration.SuppressParallelInference = true;
-            _yoloPredictor.Configuration.KeepAspectRatio = true;
-            _yoloPredictor.Configuration.Confidence = 0.3F;
-            //_drawingOptions = new DetectionDrawingOptions
-            //{
-            //    DrawBoundingBoxes = true,
-            //    DrawConfidenceScore = true,
-            //    DrawLabels = true,
-            //    EnableFontShadow = true,
 
-            //    Font = SKTypeface.Default,
-
-            //    FontSize = 18,
-            //    FontColor = SKColors.White,
-            //    DrawLabelBackground = true,
-            //    EnableDynamicScaling = true,
-            //    BorderThickness = 2,
-
-            //    BoundingBoxOpacity = 128,
-
-            //};
-            //yoloPredictor = new Yolo(new YoloOptions
-            //{
-            //    OnnxModel = "best.onnx",
-            //    ExecutionProvider = new CudaExecutionProvider(GpuId: 0, PrimeGpu: true),
-            //    ImageResize = ImageResize.Proportional,
-            //    SamplingOptions = new(SKFilterMode.Nearest, SKMipmapMode.None) // YoloDotNet default
-            //});
+            _yoloPredictor.LoadModel("best.onnx", 0.3f, 0.5f);
         }
 
         private void btnSelectDir_Click(object sender, EventArgs e)
@@ -122,7 +84,6 @@ namespace YoloOnnxWinform
 
         private void ProcessImage()
         {
-
             this.progressBar1.Value = 0;
             Task.Run(() =>
             {
@@ -223,48 +184,11 @@ namespace YoloOnnxWinform
                 var item = _viewPresenter.GetSelectRowData(row);
                 if (item != null)
                 {
-                    var result = _yoloPredictor.Detect(item.FilePath);
-                    using var image = SixLabors.ImageSharp.Image.Load(item.FilePath);
-
-                    using var plot = result.PlotImage(image);
-                    if (plot != null)
+                    string path = _yoloPredictor.SaveImage(item);
+                    if (!string.IsNullOrEmpty(path))
                     {
-                        string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
-                        if (!Directory.Exists(folder))
-                        {
-                            Directory.CreateDirectory(folder);
-                        }
-                        string path = Path.Combine(folder, item.FileName);
-                        if (File.Exists(path))
-                        {
-                            File.Delete(path);
-                        }
-                        plot.Save(path);
                         FormUtils.Show(item.FileName, path);
                     }
-
-                    //using var image = SKBitmap.Decode(item.FilePath);
-
-                    //// Run object detection inference
-                    //var results = yoloPredictor.RunObjectDetection(image, confidence: 0.15, iou: 0.7);
-
-                    //// Draw results
-                    //image.Draw(results, _drawingOptions);
-
-                    //string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
-                    //if (!Directory.Exists(folder))
-                    //{
-                    //    Directory.CreateDirectory(folder);
-                    //}
-                    //string path = Path.Combine(folder, item.FileName);
-                    //if (File.Exists(path))
-                    //{
-                    //    File.Delete(path);
-                    //}
-
-                    //// Save image
-                    //image.Save(path, SKEncodedImageFormat.Jpeg, 80);
-                    //FormUtils.Show(item.FileName, path);
                 }
             }
             catch (Exception ex)
@@ -291,6 +215,7 @@ namespace YoloOnnxWinform
                 e.Cancel = true;
                 return;
             }
+
 
             if (_yoloPredictor != null)
             {

@@ -105,7 +105,7 @@ internal class PredictorServiceResolver : IDisposable
                 services.AddSingleton<IParser<Classification>, ClassificationParser>();
                 break;
         }
-
+        
         return services;
     }
 
