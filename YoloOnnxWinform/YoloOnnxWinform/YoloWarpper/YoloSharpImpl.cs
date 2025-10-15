@@ -35,6 +35,9 @@ namespace YoloOnnxWinform.YoloWarpper
             _yoloPredictor = new YoloPredictor(modelPath);
             _yoloPredictor.Configuration.Confidence = confidence;
             _yoloPredictor.Configuration.IoU = iou;
+            _yoloPredictor.Configuration.KeepAspectRatio = true;
+            _yoloPredictor.Configuration.ApplyAutoOrient = true;
+        
         }
 
         public string SaveImage(FileRowItem item)

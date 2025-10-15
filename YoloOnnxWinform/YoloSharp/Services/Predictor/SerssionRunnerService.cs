@@ -167,7 +167,7 @@ internal class SessionRunnerService(YoloSession yoloSession,
                    : ResizeMode.Stretch,
 
             // Select faster resampling algorithm
-            Sampler = KnownResamplers.NearestNeighbor
+            Sampler = KnownResamplers.Bicubic
         };
 
         // Create resized image
