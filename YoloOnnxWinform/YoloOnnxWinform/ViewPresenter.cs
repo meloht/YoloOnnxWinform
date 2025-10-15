@@ -92,7 +92,7 @@ namespace YoloOnnxWinform
                     string filePath = _dictFile[item.FileName];
                     DataModel viewModel = GetDetectResult(yoloPredictor, filePath);
                     var span = DateTime.Now - current;
-                    if (span.TotalMilliseconds > 300)
+                    if (span.TotalMilliseconds > 100)
                     {
                         current = DateTime.Now;
                         _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");

@@ -97,7 +97,7 @@
             label1.Name = "label1";
             label1.Size = new Size(117, 17);
             label1.TabIndex = 2;
-            label1.Text = "Execute Cost Time:";
+            label1.Text = "Execute Time Cost:";
             // 
             // btnSelectDir
             // 

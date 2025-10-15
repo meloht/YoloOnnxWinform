@@ -1,4 +1,4 @@
-﻿using Compunet.YoloSharp;
+﻿
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
