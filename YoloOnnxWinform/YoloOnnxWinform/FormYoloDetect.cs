@@ -200,10 +200,6 @@ namespace YoloOnnxWinform
 
         }
 
-
-
-
-
         private void FormYoloDetect_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (this.btnAly.Enabled == false)
