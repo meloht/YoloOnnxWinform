@@ -30,7 +30,6 @@ namespace YoloOnnxWinform
 
         private void FormYoloDetect_Load(object sender, EventArgs e)
         {
-
             _yoloPredictor.LoadModel("best.onnx", 0.3f, 0.5f);
         }
 
@@ -81,6 +80,7 @@ namespace YoloOnnxWinform
 
         private void ProcessImage()
         {
+          
             this.progressBar1.Value = 0;
             Task.Run(() =>
             {
