@@ -28,9 +28,18 @@ namespace YoloOnnxWinform.YoloWarpper
             using var image = SKBitmap.Decode(imgPath);
             var data = yoloPredictor.RunObjectDetection(image, confidence: _confidence, iou: this._iou);
 
-            model.DetectionResult = data.Count.ToString();
+            model.DetectionResult = GetResult(data);
 
             return model;
+        }
+
+        private string GetResult(List<ObjectDetection> list)
+        {
+            if (list == null || list.Count == 0)
+                return string.Empty;
+
+            var dict = list.GroupBy(p => p.Label.Name).Select(p => $"{p.Count()} {p.Key}").ToList();
+            return string.Join(", ", dict);
         }
 
         public void Dispose()
@@ -65,7 +74,7 @@ namespace YoloOnnxWinform.YoloWarpper
                 OnnxModel = modelPath,
                 ExecutionProvider = new CpuExecutionProvider(),
                 ImageResize = ImageResize.Proportional,
-                SamplingOptions = new(SKFilterMode.Nearest, SKMipmapMode.None) // YoloDotNet default
+                SamplingOptions = new(SKFilterMode.Linear, SKMipmapMode.None) // YoloDotNet default
             });
         }
 

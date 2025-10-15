@@ -8,24 +8,17 @@ using YoloOnnxWinform.YoloOnnx;
 
 namespace YoloOnnxWinform.YoloWarpper
 {
-    public class YoloDetectOrtValImpl : IYoloModel
+    public class YoloDetectOrtValImpl : YoloDetectImplBase, IYoloModel
     {
         private YoloDetectOrtVal yoloPredictor;
         public DataModel DetectImage(string imgPath)
         {
-            DataModel model = new DataModel();
-
-            using Mat inputImage = Cv2.ImRead(imgPath);
-            var data = yoloPredictor.Run(inputImage);
-
-            model.DetectionResult = data.Count.ToString();
-
-            return model;
+            return DetectImage(imgPath, yoloPredictor);
         }
-
+       
         public void Dispose()
         {
-            yoloPredictor?.Dispose();
+            Dispose(yoloPredictor);
         }
 
         public void LoadModel(string modelPath, float confidence, float iou)
@@ -35,21 +28,7 @@ namespace YoloOnnxWinform.YoloWarpper
 
         public string SaveImage(FileRowItem item)
         {
-            using Mat inputImage = Cv2.ImRead(item.FilePath);
-            var result = yoloPredictor.Run(inputImage);
-            yoloPredictor.DrawDetections(inputImage, result);
-            string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-            string path = Path.Combine(folder, item.FileName);
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
-            Cv2.ImWrite(path, inputImage);
-            return path;
+            return SaveImage(item, yoloPredictor);
         }
     }
 }

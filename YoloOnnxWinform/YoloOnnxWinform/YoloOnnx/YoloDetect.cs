@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace YoloOnnxWinform.YoloOnnx
 {
-    public class YoloDetect : YoloDetectBase, IDisposable
+    public class YoloDetect : YoloDetectBase, IYoloDetect
     {
         public readonly string _onnxModelPath;
         private readonly float _confidenceThres;

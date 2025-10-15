@@ -33,8 +33,6 @@ namespace YoloOnnxWinform.YoloWarpper
         public void LoadModel(string modelPath, float confidence, float iou)
         {
             _yoloPredictor = new YoloPredictor(modelPath);
-            _yoloPredictor.Configuration.SuppressParallelInference = true;
-            _yoloPredictor.Configuration.KeepAspectRatio = true;
             _yoloPredictor.Configuration.Confidence = confidence;
             _yoloPredictor.Configuration.IoU = iou;
         }

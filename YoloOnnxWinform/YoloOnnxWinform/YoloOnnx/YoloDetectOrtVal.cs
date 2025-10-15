@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace YoloOnnxWinform.YoloOnnx
 {
-    public class YoloDetectOrtVal : YoloDetectBase, IDisposable
+    public class YoloDetectOrtVal : YoloDetectBase, IYoloDetect
     {
         private readonly float _confidenceThres;
         private readonly float _iouThres;
