@@ -17,7 +17,7 @@ namespace YoloDotNet.Modules.V8
             _objectDetectionModule = new ObjectDetectionModuleV8(_yoloCore);
         }
 
-        public List<OBBDetection> ProcessImage<T>(T image, double confidence, double pixelConfidence, double iou)
+        public List<OBBDetection> ProcessImage<T>(T image, float confidence, float pixelConfidence, float iou)
         {
             var (ortValues, imageSize) = _yoloCore.Run(image);
             using IDisposableReadOnlyCollection<OrtValue> _ = ortValues;

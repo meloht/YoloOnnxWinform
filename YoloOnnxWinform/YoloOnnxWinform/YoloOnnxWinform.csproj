@@ -17,6 +17,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CommImageControl\CommImageControl.csproj" />
+    <ProjectReference Include="..\YoloDotNet\YoloDotNet.csproj" />
+    <ProjectReference Include="..\YoloSharp\YoloSharp.csproj" />
   </ItemGroup>
 
   <ItemGroup>

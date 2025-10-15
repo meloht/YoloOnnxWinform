@@ -26,7 +26,7 @@ namespace YoloDotNet.Modules.V8
             _channels4 = _channels * 4;
         }
 
-        public List<ObjectDetection> ProcessImage<T>(T image, double confidence, double pixelConfidence, double iou)
+        public List<ObjectDetection> ProcessImage<T>(T image, float confidence, float pixelConfidence, float iou)
         {
             var (ortValues, imageSize) = _yoloCore.Run(image);
             using IDisposableReadOnlyCollection<OrtValue> _ = ortValues;
@@ -49,7 +49,7 @@ namespace YoloDotNet.Modules.V8
         /// <param name="confidenceThreshold">The confidence threshold for accepting object detections.</param>
         /// <param name="overlapThreshold">The threshold for overlapping boxes to filter detections.</param>
         /// <returns>A list of result models representing detected objects.</returns>
-        public ObjectResult[] ObjectDetection(SKSizeI imageSize, ReadOnlySpan<float> ortSpan, double confidenceThreshold, double overlapThreshold)
+        public ObjectResult[] ObjectDetection(SKSizeI imageSize, ReadOnlySpan<float> ortSpan, float confidenceThreshold, float overlapThreshold)
         {
             if (ortSpan == null)
                 return [];

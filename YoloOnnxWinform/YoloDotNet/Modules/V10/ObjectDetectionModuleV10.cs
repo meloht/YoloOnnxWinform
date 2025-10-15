@@ -19,7 +19,7 @@ namespace YoloDotNet.Modules.V10
             _yoloCore = yoloCore;
         }
 
-        public List<ObjectDetection> ProcessImage<T>(T image, double confidence, double pixelConfidence, double iou)
+        public List<ObjectDetection> ProcessImage<T>(T image, float confidence, float pixelConfidence, float iou)
         {
             var (ortValues, imageSize) = _yoloCore.Run(image);
             using IDisposableReadOnlyCollection<OrtValue> _ = ortValues;
@@ -34,7 +34,7 @@ namespace YoloDotNet.Modules.V10
 
         #region Helper methods
 
-        private ObjectResult[] ObjectDetection(SKSizeI imageSize, OrtValue ortTensor, double confidenceThreshold, double overlapThreshold)
+        private ObjectResult[] ObjectDetection(SKSizeI imageSize, OrtValue ortTensor, float confidenceThreshold, float overlapThreshold)
         {
             var (xPad, yPad, xGain, yGain) = _yoloCore.CalculateGain(imageSize);
 

@@ -1,98 +1,98 @@
-﻿//using SixLabors.ImageSharp.Drawing.Processing;
-//using SkiaSharp;
-//using System;
-//using System.Collections.Generic;
-//using System.Diagnostics;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-//using YoloDotNet;
-//using YoloDotNet.Core;
-//using YoloDotNet.Enums;
-//using YoloDotNet.Extensions;
-//using YoloDotNet.Models;
+﻿
+using SkiaSharp;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using YoloDotNet;
+using YoloDotNet.Core;
+using YoloDotNet.Enums;
+using YoloDotNet.Extensions;
+using YoloDotNet.Models;
 
-//namespace YoloOnnxWinform.YoloWarpper
-//{
-  
-//    public class YoloDotNetImpl : IYoloModel
-//    {
-//        private Yolo yoloPredictor;
-//        private DetectionDrawingOptions _drawingOptions;
-//        private float _confidence;
-//        private float _iou;
-//        public DataModel DetectImage(string imgPath)
-//        {
-//            DataModel model = new DataModel();
+namespace YoloOnnxWinform.YoloWarpper
+{
 
-//            using var image = SKBitmap.Decode(imgPath);
-//            var data = yoloPredictor.RunObjectDetection(image, confidence: this._confidence, iou: this._iou);
-          
-//            model.DetectionResult = data.Count.ToString();
-           
-//            return model;
-//        }
+    public class YoloDotNetImpl : IYoloModel
+    {
+        private Yolo yoloPredictor;
+        private DetectionDrawingOptions _drawingOptions;
+        private float _confidence;
+        private float _iou;
+        public DataModel DetectImage(string imgPath)
+        {
+            DataModel model = new DataModel();
 
-//        public void Dispose()
-//        {
-//            yoloPredictor?.Dispose();
-//        }
+            using var image = SKBitmap.Decode(imgPath);
+            var data = yoloPredictor.RunObjectDetection(image, confidence: _confidence, iou: this._iou);
 
-//        public void LoadModel(string modelPath, float confidence, float iou)
-//        {
-//            _drawingOptions = new DetectionDrawingOptions
-//            {
-//                DrawBoundingBoxes = true,
-//                DrawConfidenceScore = true,
-//                DrawLabels = true,
-//                EnableFontShadow = true,
+            model.DetectionResult = data.Count.ToString();
 
-//                Font = SKTypeface.Default,
+            return model;
+        }
 
-//                FontSize = 18,
-//                FontColor = SKColors.Blue,
-//                DrawLabelBackground = true,
-//                EnableDynamicScaling = true,
-//                BorderThickness = 2,
+        public void Dispose()
+        {
+            yoloPredictor?.Dispose();
+        }
 
-//                BoundingBoxOpacity = 64,
+        public void LoadModel(string modelPath, float confidence, float iou)
+        {
+            _drawingOptions = new DetectionDrawingOptions
+            {
+                DrawBoundingBoxes = true,
+                DrawConfidenceScore = true,
+                DrawLabels = true,
+                EnableFontShadow = true,
 
-//            };
-//            this._confidence = confidence;
-//            this._iou = iou;
-//            yoloPredictor = new Yolo(new YoloOptions
-//            {
-//                OnnxModel = modelPath,
-//                ExecutionProvider = new CpuExecutionProvider(),
-//                ImageResize = ImageResize.Proportional,
-//                SamplingOptions = new(SKFilterMode.Nearest, SKMipmapMode.None) // YoloDotNet default
-//            });
-//        }
+                Font = SKTypeface.Default,
 
-//        public string SaveImage(FileRowItem item)
-//        {
-//            using var image = SKBitmap.Decode(item.FilePath);
+                FontSize = 18,
+                FontColor = SKColors.Blue,
+                DrawLabelBackground = true,
+                EnableDynamicScaling = true,
+                BorderThickness = 2,
 
-//            // Run object detection inference
-//            var results = yoloPredictor.RunObjectDetection(image, confidence: this._confidence, iou: this._iou);
+                BoundingBoxOpacity = 64,
 
-//            // Draw results
-//            image.Draw(results, _drawingOptions);
+            };
+            this._confidence = confidence;
+            this._iou = iou;
+            yoloPredictor = new Yolo(new YoloOptions
+            {
+                OnnxModel = modelPath,
+                ExecutionProvider = new CpuExecutionProvider(),
+                ImageResize = ImageResize.Proportional,
+                SamplingOptions = new(SKFilterMode.Nearest, SKMipmapMode.None) // YoloDotNet default
+            });
+        }
 
-//            string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
-//            if (!Directory.Exists(folder))
-//            {
-//                Directory.CreateDirectory(folder);
-//            }
-//            string path = Path.Combine(folder, item.FileName);
-//            if (File.Exists(path))
-//            {
-//                File.Delete(path);
-//            }
+        public string SaveImage(FileRowItem item)
+        {
+            using var image = SKBitmap.Decode(item.FilePath);
 
-//            // Save image
-//            image.Save(path, SKEncodedImageFormat.Jpeg, 100);
-//            return path;
-//        }
-//    }
-//}
+            // Run object detection inference
+            var results = yoloPredictor.RunObjectDetection(image, confidence: _confidence, iou: this._iou);
+
+            // Draw results
+            image.Draw(results, _drawingOptions);
+
+            string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+            string path = Path.Combine(folder, item.FileName);
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+
+            // Save image
+            image.Save(path, SKEncodedImageFormat.Jpeg, 100);
+            return path;
+        }
+    }
+}

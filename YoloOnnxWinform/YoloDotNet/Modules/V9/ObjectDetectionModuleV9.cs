@@ -19,7 +19,7 @@ namespace YoloDotNet.Modules.V9
             _objectDetectionModule = new ObjectDetectionModuleV8(_yoloCore);
         }
 
-        public List<ObjectDetection> ProcessImage<T>(T image, double confidence, double pixelConfidence, double iou)
+        public List<ObjectDetection> ProcessImage<T>(T image, float confidence, float pixelConfidence, float iou)
             => _objectDetectionModule.ProcessImage(image, confidence, pixelConfidence, iou);
 
         public void Dispose()

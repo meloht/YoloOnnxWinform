@@ -15,7 +15,7 @@ namespace YoloDotNet.Modules.V8
             _yoloCore = yoloCore;
         }
 
-        public List<Classification> ProcessImage<T>(T image, double classes, double pixelConfidence, double iou)
+        public List<Classification> ProcessImage<T>(T image, float classes, float pixelConfidence, float iou)
         {
             var (ortValues, _) = _yoloCore.Run(image);
 

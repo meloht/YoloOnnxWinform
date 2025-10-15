@@ -56,7 +56,7 @@ namespace YoloDotNet
         /// <param name="confidence">The confidence threshold for detected objects (default is 0.2).</param>
         /// <param name="iou">IoU (Intersection Over Union) overlap threshold value for removing overlapping bounding boxes (default: 0.7).</param>
         /// <returns>A list of classification results.</returns>
-        public List<ObjectDetection> RunObjectDetection(SKBitmap img, double confidence = 0.2, double iou = 0.7)
+        public List<ObjectDetection> RunObjectDetection(SKBitmap img, float confidence = 0.2f, float iou = 0.7f)
             => ((IObjectDetectionModule)_detection).ProcessImage(img, confidence, 0, iou);
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace YoloDotNet
         /// <param name="confidence">The confidence threshold for detected objects (default is 0.2).</param>
         /// <param name="iou">IoU (Intersection Over Union) overlap threshold value for removing overlapping bounding boxes (default: 0.7).</param>
         /// <returns>A list of classification results.</returns>
-        public List<ObjectDetection> RunObjectDetection(SKImage img, double confidence = 0.2, double iou = 0.7)
+        public List<ObjectDetection> RunObjectDetection(SKImage img, float confidence = 0.2f, float iou = 0.7f)
              => ((IObjectDetectionModule)_detection).ProcessImage(img, confidence, 0, iou);
 
         #endregion
@@ -80,7 +80,7 @@ namespace YoloDotNet
         /// <param name="confidence">The confidence threshold for detected objects (default is 0.2).</param>
         /// <param name="iou">IoU (Intersection Over Union) overlap threshold value for removing overlapping bounding boxes (default: 0.7).</param>
         /// <returns>A list of Segmentation results.</returns>
-        public List<OBBDetection> RunObbDetection(SKBitmap img, double confidence = 0.2, double iou = 0.7)
+        public List<OBBDetection> RunObbDetection(SKBitmap img, float confidence = 0.2f, float iou = 0.7f)
             => ((IOBBDetectionModule)_detection).ProcessImage(img, confidence, 0, iou);
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace YoloDotNet
         /// <param name="confidence">The confidence threshold for detected objects (default is 0.2).</param>
         /// <param name="iou">IoU (Intersection Over Union) overlap threshold value for removing overlapping bounding boxes (default: 0.7).</param>
         /// <returns>A list of Segmentation results.</returns>
-        public List<OBBDetection> RunObbDetection(SKImage img, double confidence = 0.2, double iou = 0.7)
+        public List<OBBDetection> RunObbDetection(SKImage img, float confidence = 0.2f, float iou = 0.7f)
             => ((IOBBDetectionModule)_detection).ProcessImage(img, confidence, 0, iou);
 
         #endregion
@@ -104,7 +104,7 @@ namespace YoloDotNet
         /// <param name="confidence">The confidence threshold for detected objects (default is 0.2).</param>
         /// <param name="iou">IoU (Intersection Over Union) overlap threshold value for removing overlapping bounding boxes (default: 0.7).</param>
         /// <returns>A list of Segmentation results.</returns>
-        public List<Segmentation> RunSegmentation(SKBitmap img, double confidence = 0.2, double pixelConfedence = 0.65, double iou = 0.7)
+        public List<Segmentation> RunSegmentation(SKBitmap img, float confidence = 0.2f, float pixelConfedence = 0.65f, float iou = 0.7f)
             => ((ISegmentationModule)_detection).ProcessImage(img, confidence, pixelConfedence, iou);
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace YoloDotNet
         /// <param name="confidence">The confidence threshold for detected objects (default is 0.2).</param>
         /// <param name="iou">IoU (Intersection Over Union) overlap threshold value for removing overlapping bounding boxes (default: 0.7).</param>
         /// <returns>A list of Segmentation results.</returns>
-        public List<Segmentation> RunSegmentation(SKImage img, double confidence = 0.2, double pixelConfedence = 0.65, double iou = 0.7)
+        public List<Segmentation> RunSegmentation(SKImage img, float confidence = 0.2f, float pixelConfedence = 0.65f, float iou = 0.7f)
             => ((ISegmentationModule)_detection).ProcessImage(img, confidence, pixelConfedence, iou);
 
         #endregion
@@ -128,7 +128,7 @@ namespace YoloDotNet
         /// <param name="confidence">The confidence threshold for detected objects (default is 0.2).</param>
         /// <param name="iou">IoU (Intersection Over Union) overlap threshold value for removing overlapping bounding boxes (default: 0.7).</param>
         /// <returns>A list of Segmentation results.</returns>
-        public List<PoseEstimation> RunPoseEstimation(SKBitmap img, double confidence = 0.2, double iou = 0.7)
+        public List<PoseEstimation> RunPoseEstimation(SKBitmap img, float confidence = 0.2f, float iou = 0.7f)
             => ((IPoseEstimationModule)_detection).ProcessImage(img, confidence, 0, iou);
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace YoloDotNet
         /// <param name="confidence">The confidence threshold for detected objects (default is 0.2).</param>
         /// <param name="iou">IoU (Intersection Over Union) overlap threshold value for removing overlapping bounding boxes (default: 0.7).</param>
         /// <returns>A list of Segmentation results.</returns>
-        public List<PoseEstimation> RunPoseEstimation(SKImage img, double confidence = 0.2, double iou = 0.7)
+        public List<PoseEstimation> RunPoseEstimation(SKImage img, float confidence = 0.2f, float iou = 0.7f)
             => ((IPoseEstimationModule)_detection).ProcessImage(img, confidence, 0, iou);
 
         #endregion

@@ -17,7 +17,7 @@ namespace YoloDotNet.Modules.V8
             _objectDetectionModule = new ObjectDetectionModuleV8(_yoloCore);
         }
 
-        public List<PoseEstimation> ProcessImage<T>(T image, double confidence, double pixelConfidence, double iou)
+        public List<PoseEstimation> ProcessImage<T>(T image, float confidence, float pixelConfidence, float iou)
         {
             var (ortValues, imageSize) = _yoloCore.Run(image);
             using IDisposableReadOnlyCollection<OrtValue> _ = ortValues;
@@ -30,7 +30,7 @@ namespace YoloDotNet.Modules.V8
 
         #region Helper methods
 
-        public List<PoseEstimation> PoseEstimateImage(SKSizeI imageSize, ReadOnlySpan<float> ortSpan, double threshold, double overlapThrehshold)
+        public List<PoseEstimation> PoseEstimateImage(SKSizeI imageSize, ReadOnlySpan<float> ortSpan, float threshold, float overlapThrehshold)
         {
             var boxes = _objectDetectionModule.ObjectDetection(imageSize, ortSpan, threshold, overlapThrehshold);
 

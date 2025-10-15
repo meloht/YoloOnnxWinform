@@ -50,14 +50,14 @@ namespace YoloDotNet.Modules.V8
             _scalingFactorH = (float)_maskHeight / inputHeight;
         }
 
-        public List<Segmentation> ProcessImage<T>(T image, double confidence, double pixelConfidence, double iou)
+        public List<Segmentation> ProcessImage<T>(T image, float confidence, float pixelConfidence, float iou)
         {
             var (ortValues, imageSize) = _yoloCore.Run(image);
 
             return RunSegmentation(imageSize, ortValues, confidence, pixelConfidence, iou);
         }
 
-        private List<Segmentation> RunSegmentation(SKSizeI imageSize, IDisposableReadOnlyCollection<OrtValue> ortValues, double confidence, double pixelConfidence, double iou)
+        private List<Segmentation> RunSegmentation(SKSizeI imageSize, IDisposableReadOnlyCollection<OrtValue> ortValues, float confidence, float pixelConfidence, float iou)
         {
             var ortSpan0 = ortValues[0].GetTensorDataAsSpan<float>();
             var ortSpan1 = ortValues[1].GetTensorDataAsSpan<float>();

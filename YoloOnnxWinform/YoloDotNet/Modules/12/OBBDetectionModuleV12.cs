@@ -19,7 +19,7 @@ namespace YoloDotNet.Modules.V12
             _obbDetectionModuleV8 = new OBBDetectionModuleV8(_yoloCore);
         }
 
-        public List<OBBDetection> ProcessImage<T>(T image, double confidence, double pixelConfidence, double iou)
+        public List<OBBDetection> ProcessImage<T>(T image, float confidence, float pixelConfidence, float iou)
             => _obbDetectionModuleV8.ProcessImage(image, confidence, pixelConfidence, iou);
 
         #region Helper methods
