@@ -41,8 +41,6 @@ namespace YoloOnnxWinform
                 try
                 {
                     btnSelectDir.Enabled = false;
-
-
                     LoadImages(this.textboxDir.Text.Trim());
                 }
                 catch (Exception ex)
@@ -208,7 +206,6 @@ namespace YoloOnnxWinform
                 e.Cancel = true;
                 return;
             }
-
 
             if (_yoloPredictor != null)
             {
