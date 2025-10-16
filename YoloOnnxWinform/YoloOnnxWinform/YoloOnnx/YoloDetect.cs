@@ -5,6 +5,7 @@ using Microsoft.ML.OnnxRuntime.Tensors;
 using OpenCvSharp;
 using OpenCvSharp.Dnn;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,11 +36,13 @@ namespace YoloOnnxWinform.YoloOnnx
             var inputDims = inputMeta.Dimensions;
             InputHeight = inputDims[2];
             InputWidth = inputDims[3];
+
+            RentDataInt(inputDims);
         }
 
       
 
-        private (float[] data, int topPad, int leftPad) Preprocess(Mat inputImage, int imageHeight, int imageWidth)
+        private (float[] data, int topPad, int leftPad) Preprocess(Mat inputImage)
         {
             // BGR转RGB
             using Mat rgbImg = new Mat();
@@ -54,16 +57,13 @@ namespace YoloOnnxWinform.YoloOnnx
 
             // 转换为CHW格式 (3, H, W)
             var channels = paddedImg.Split();
-            float[] data = new float[3 * paddedImg.Rows * paddedImg.Cols];
-            int index = 0;
+          
+            int channelSize = paddedImg.Height * paddedImg.Width;
 
-            foreach (var channel in channels)
-            {
-                float[] channelData = new float[channel.Rows * channel.Cols];
-                channel.GetArray(out channelData);
-                Array.Copy(channelData, 0, data, index, channelData.Length);
-                index += channelData.Length;
-            }
+            float[] data = base.rentData;
+
+            OptimizedGetAllChannelData(channels, data);
+
             foreach (var item in channels)
             {
                 item.Dispose();
@@ -72,7 +72,26 @@ namespace YoloOnnxWinform.YoloOnnx
             // 添加批次维度 (1, 3, H, W)
             return (data, topPad, leftPad);
         }
+        private void OptimizedGetAllChannelData(Mat[] channels, float[] data)
+        {
+            if (channels == null || channels.Length == 0)
+                return;
 
+            var dataSpan = data.AsSpan();
+            int index = 0;
+
+            for (int i = 0; i < channels.Length; i++)
+            {
+                var channel = channels[i];
+                int channelSize = channel.Rows * channel.Cols;
+
+                var channelSpan = channel.AsSpan<float>();
+                channelSpan.CopyTo(dataSpan.Slice(index, channelSize));
+
+                index += channelSize;
+            }
+
+        }
         private float[,] ProcessTensorOutput(Tensor<float> outputTensor)
         {
             // 获取Tensor的维度
@@ -221,7 +240,7 @@ namespace YoloOnnxWinform.YoloOnnx
             int imageWidth = inputImage.Cols;
 
             // 预处理图像
-            (float[] inputData, int topPad, int leftPad) = Preprocess(inputImage, imageHeight, imageWidth);
+            (float[] inputData, int topPad, int leftPad) = Preprocess(inputImage);
             string inputName = session.InputNames[0];
             // 准备输入
             var inputTensor = new DenseTensor<float>(inputData, inputDims);

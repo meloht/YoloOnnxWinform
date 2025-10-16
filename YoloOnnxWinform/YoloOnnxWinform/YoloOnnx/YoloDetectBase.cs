@@ -14,10 +14,22 @@ namespace YoloOnnxWinform.YoloOnnx
         protected int InputWidth;
         protected int InputHeight;
         protected readonly Scalar _paddingColor;
+        protected float[] rentData;
 
         public YoloDetectBase()
         {
             _paddingColor = new Scalar(114, 114, 114);
+        }
+
+
+        protected void RentDataInt(int[] dimensions)
+        {
+            int len = 1;
+            foreach (var item in dimensions)
+            {
+                len = len * item;
+            }
+            rentData = new float[len];
         }
         protected LabelModel[] MapLabelsAndColors(InferenceSession session)
         {

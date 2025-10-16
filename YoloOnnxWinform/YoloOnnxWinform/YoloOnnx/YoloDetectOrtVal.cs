@@ -70,6 +70,8 @@ namespace YoloOnnxWinform.YoloOnnx
                     _session.InputMetadata[InputName].Dimensions[2], // Required image height
                     _session.InputMetadata[InputName].Dimensions[3], // Required image width
               };
+
+            RentDataInt(_session.InputMetadata[InputName].Dimensions);
         }
 
       
@@ -194,21 +196,26 @@ namespace YoloOnnxWinform.YoloOnnx
             paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
 
             //// 转换为CHW格式 (3, H, W)
-            //var channels = paddedImg.Split();
-            //float[] data = new float[3 * paddedImg.Rows * paddedImg.Cols];
-            //int index = 0;
+            var channels = paddedImg.Split();
+  
+            float[] data = base.rentData;
+          
+            int index = 0;
 
-            //foreach (var channel in channels)
-            //{
-            //    float[] channelData = new float[channel.Rows * channel.Cols];
-            //    channel.GetArray<float>(out channelData);
-            //    Array.Copy(channelData, 0, data, index, channelData.Length);
-            //    index += channelData.Length;
-            //}
-
-            int channelSize = paddedImg.Height * paddedImg.Width;
-            float[] data = ArrayPool<float>.Shared.Rent(3 * channelSize);
-            ConvertToCHW(paddedImg, data);
+            foreach (var channel in channels)
+            {
+                float[] channelData = new float[channel.Rows * channel.Cols];
+                channel.GetArray<float>(out channelData);
+                Array.Copy(channelData, 0, data, index, channelData.Length);
+                index += channelData.Length;
+            }
+            foreach (var item in channels)
+            {
+                item.Dispose();
+            }
+            //int channelSize = paddedImg.Height * paddedImg.Width;
+            //float[] data = ArrayPool<float>.Shared.Rent(3 * channelSize);
+            //ConvertToCHW(paddedImg, data);
 
             paddedImg.Dispose();
             // 添加批次维度 (1, 3, H, W)
@@ -258,7 +265,7 @@ namespace YoloOnnxWinform.YoloOnnx
             using var outputs = _session.Run(runOptions, [InputName], [inputOrtValue], _session.OutputNames);
             using var output_0 = outputs[0];
 
-            ArrayPool<float>.Shared.Return(inputData);
+            //ArrayPool<float>.Shared.Return(inputData);
             // 后处理
             var result = Postprocess(inputImage, output_0, top, left);
 
