@@ -63,7 +63,7 @@ namespace YoloOnnxWinform
         {
             _formProgress.DataGridList.Columns.Clear();
             AddColumn("FileName", 350, _formProgress.DataGridList);
-            AddColumn("DetectionResult", 200, _formProgress.DataGridList);
+            AddColumn("DetectionResult", 240, _formProgress.DataGridList);
             AddColumn("ExecuteTime", 200, _formProgress.DataGridList);
             AddColumn("ErrorLog", 400, _formProgress.DataGridList);
 

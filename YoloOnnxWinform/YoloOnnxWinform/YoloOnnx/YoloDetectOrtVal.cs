@@ -196,11 +196,11 @@ namespace YoloOnnxWinform.YoloOnnx
             paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
 
             //// 转换为CHW格式 (3, H, W)
-            var channels = paddedImg.Split();
+            //var channels = paddedImg.Split();
   
             float[] data = base.rentData;
-
-            OptimizedGetAllChannelData(channels, data);
+            ConvertToCHW(paddedImg,data);
+            //OptimizedGetAllChannelData(channels, data);
             paddedImg.Dispose();
             // 添加批次维度 (1, 3, H, W)
             return (data, top, left);
