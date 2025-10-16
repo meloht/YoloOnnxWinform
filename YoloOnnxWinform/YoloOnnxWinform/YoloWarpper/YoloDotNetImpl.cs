@@ -21,16 +21,12 @@
 //        private DetectionDrawingOptions _drawingOptions;
 //        private float _confidence;
 //        private float _iou;
-//        public DataModel DetectImage(string imgPath)
+//        public string DetectImage(string imgPath)
 //        {
-//            DataModel model = new DataModel();
-
 //            using var image = SKBitmap.Decode(imgPath);
 //            var data = yoloPredictor.RunObjectDetection(image, confidence: _confidence, iou: this._iou);
 
-//            model.DetectionResult = GetResult(data);
-
-//            return model;
+//            return GetResult(data);
 //        }
 
 //        private string GetResult(List<ObjectDetection> list)
@@ -39,7 +35,8 @@
 //                return string.Empty;
 
 //            var dict = list.GroupBy(p => p.Label.Name).Select(p => $"{p.Count()} {p.Key}").ToList();
-//            return string.Join(", ", dict);
+//            string confs = string.Join(", ", list.Select(p => Math.Round(p.Confidence, 2)));
+//            return $"{string.Join(", ", dict)} [{confs}]";
 //        }
 
 //        public void Dispose()

@@ -199,60 +199,14 @@ namespace YoloOnnxWinform.YoloOnnx
             var channels = paddedImg.Split();
   
             float[] data = base.rentData;
-          
-            int index = 0;
 
-            foreach (var channel in channels)
-            {
-                float[] channelData = new float[channel.Rows * channel.Cols];
-                channel.GetArray<float>(out channelData);
-                Array.Copy(channelData, 0, data, index, channelData.Length);
-                index += channelData.Length;
-            }
-            foreach (var item in channels)
-            {
-                item.Dispose();
-            }
-            //int channelSize = paddedImg.Height * paddedImg.Width;
-            //float[] data = ArrayPool<float>.Shared.Rent(3 * channelSize);
-            //ConvertToCHW(paddedImg, data);
-
+            OptimizedGetAllChannelData(channels, data);
             paddedImg.Dispose();
             // 添加批次维度 (1, 3, H, W)
             return (data, top, left);
         }
 
-        private unsafe void ConvertToCHW(Mat image, float[] data)
-        {
-            int height = image.Rows;
-            int width = image.Cols;
-            int channelSize = height * width;
 
-
-            // 使用指针直接访问，避免Split的开销
-            unsafe
-            {
-                float* ptr = (float*)image.Data;
-
-                fixed (float* dataPtr = data)
-                {
-                    for (int y = 0; y < height; y++)
-                    {
-                        for (int x = 0; x < width; x++)
-                        {
-                            int srcIndex = (y * width + x) * 3;
-                            int dstIndexR = y * width + x;
-                            int dstIndexG = dstIndexR + channelSize;
-                            int dstIndexB = dstIndexG + channelSize;
-
-                            dataPtr[dstIndexB] = ptr[srcIndex];     // B
-                            dataPtr[dstIndexG] = ptr[srcIndex + 1]; // G  
-                            dataPtr[dstIndexR] = ptr[srcIndex + 2]; // R
-                        }
-                    }
-                }
-            }
-        }
         public List<Detection> Run(Mat inputImage)
         {
             // 预处理图像

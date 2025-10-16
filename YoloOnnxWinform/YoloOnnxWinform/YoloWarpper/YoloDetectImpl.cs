@@ -13,7 +13,7 @@ namespace YoloOnnxWinform.YoloWarpper
     {
         private YoloDetect yoloPredictor;
 
-        public DataModel DetectImage(string imgPath)
+        public string DetectImage(string imgPath)
         {
             return DetectImage(imgPath, yoloPredictor);
         }

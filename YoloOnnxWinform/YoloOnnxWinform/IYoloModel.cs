@@ -10,6 +10,6 @@ namespace YoloOnnxWinform
     {
         void LoadModel(string modelPath, float confidence, float iou);
         string SaveImage(FileRowItem item);
-        DataModel DetectImage(string imgPath);
+        string DetectImage(string imgPath);
     }
 }

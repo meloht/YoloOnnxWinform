@@ -30,7 +30,7 @@ namespace YoloOnnxWinform
 
         private void FormYoloDetect_Load(object sender, EventArgs e)
         {
-            _yoloPredictor.LoadModel("best.onnx", 0.15f, 0.3f);
+            _yoloPredictor.LoadModel("best.onnx", 0.2f, 0.3f);
         }
 
         private void btnSelectDir_Click(object sender, EventArgs e)

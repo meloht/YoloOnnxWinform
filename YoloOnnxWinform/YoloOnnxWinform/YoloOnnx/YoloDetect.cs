@@ -64,34 +64,11 @@ namespace YoloOnnxWinform.YoloOnnx
 
             OptimizedGetAllChannelData(channels, data);
 
-            foreach (var item in channels)
-            {
-                item.Dispose();
-            }
             paddedImg.Dispose();
             // 添加批次维度 (1, 3, H, W)
             return (data, topPad, leftPad);
         }
-        private void OptimizedGetAllChannelData(Mat[] channels, float[] data)
-        {
-            if (channels == null || channels.Length == 0)
-                return;
 
-            var dataSpan = data.AsSpan();
-            int index = 0;
-
-            for (int i = 0; i < channels.Length; i++)
-            {
-                var channel = channels[i];
-                int channelSize = channel.Rows * channel.Cols;
-
-                var channelSpan = channel.AsSpan<float>();
-                channelSpan.CopyTo(dataSpan.Slice(index, channelSize));
-
-                index += channelSize;
-            }
-
-        }
         private float[,] ProcessTensorOutput(Tensor<float> outputTensor)
         {
             // 获取Tensor的维度

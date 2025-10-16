@@ -73,36 +73,21 @@ namespace YoloOnnxWinform
         {
             int idx = 0;
             int total = _bindingSource.Count;
-            DataModel[] items = new DataModel[10];
-            DataModel[] models = new DataModel[10];
-            int i = 0;
-            int count = 0;
 
             DateTime current = DateTime.Now;
             foreach (var item in _bindingSource)
             {
-                i = idx % 10;
-                if (i == 0 && count > 0)
-                {
-                    count = 0;
-                    UpdateModels(items, models);
-                }
+
                 try
                 {
                     string filePath = _dictFile[item.FileName];
-                    DataModel viewModel = GetDetectResult(yoloPredictor, filePath);
+                    GetDetectResult(yoloPredictor, item, filePath);
                     var span = DateTime.Now - current;
                     if (span.TotalMilliseconds > 100)
                     {
                         current = DateTime.Now;
                         _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");
                     }
-
-
-                    i = idx % 10;
-                    models[i] = viewModel;
-                    items[i] = item;
-                    count++;
 
                 }
                 catch (Exception ex)
@@ -112,19 +97,18 @@ namespace YoloOnnxWinform
 
                 idx++;
             }
-            UpdateModels(items, models);
 
             _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");
         }
 
-        private DataModel GetDetectResult(IYoloModel yoloPredictor, string filePath)
+        private void GetDetectResult(IYoloModel yoloPredictor, DataModel model, string filePath)
         {
             _stopwatch.Start();
-            var model = yoloPredictor.DetectImage(filePath);
+            model.DetectionResult = yoloPredictor.DetectImage(filePath);
             _stopwatch.Stop();
             model.ExecuteTime = $"{_stopwatch.Elapsed.TotalMilliseconds}ms";
             _stopwatch.Reset();
-            return model;
+
         }
 
         public FileRowItem GetSelectRowData(DataGridViewRow row)
@@ -137,22 +121,7 @@ namespace YoloOnnxWinform
             return null;
         }
 
-        protected void UpdateModels(DataModel[] item, DataModel[] model)
-        {
-            _formProgress?.DataGridList?.Invoke(new Action(() =>
-            {
-                for (int i = 0; i < item.Length; i++)
-                {
-                    if (item[i] == null || model[i] == null)
-                    {
-                        continue;
-                    }
-                    UpdateImageItemModel(item[i], model[i]);
-                    item[i] = null;
-                    model[i] = null;
-                }
-            }));
-        }
+
         protected void ShowError(DataModel item, string error)
         {
             _formProgress?.DataGridList?.Invoke(new Action(() =>

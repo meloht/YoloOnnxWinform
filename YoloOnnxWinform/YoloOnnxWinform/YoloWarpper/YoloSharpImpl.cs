@@ -15,14 +15,12 @@
 //    {
 //        private YoloPredictor _yoloPredictor;
 
-//        public DataModel DetectImage(string imgPath)
+//        public string DetectImage(string imgPath)
 //        {
-//            DataModel model = new DataModel();
-
 //            var data = _yoloPredictor.Detect(imgPath);
-//            model.DetectionResult = data.ToString();
-
-//            return model;
+//            var dict = data.GroupBy(p => p.Name).Select(p => $"{p.Count()} {p.Key}").ToList();
+//            string confs = string.Join(", ", data.Select(p => Math.Round(p.Confidence, 2)));
+//            return $"{string.Join(", ", dict)} [{confs}]";
 //        }
 
 //        public void Dispose()
@@ -37,7 +35,7 @@
 //            _yoloPredictor.Configuration.IoU = iou;
 //            _yoloPredictor.Configuration.KeepAspectRatio = true;
 //            _yoloPredictor.Configuration.ApplyAutoOrient = true;
-        
+
 //        }
 
 //        public string SaveImage(FileRowItem item)

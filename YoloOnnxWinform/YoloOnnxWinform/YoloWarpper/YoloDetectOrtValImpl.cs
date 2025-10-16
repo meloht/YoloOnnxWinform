@@ -11,7 +11,7 @@ namespace YoloOnnxWinform.YoloWarpper
     public class YoloDetectOrtValImpl : YoloDetectImplBase, IYoloModel
     {
         private YoloDetectOrtVal yoloPredictor;
-        public DataModel DetectImage(string imgPath)
+        public string DetectImage(string imgPath)
         {
             return DetectImage(imgPath, yoloPredictor);
         }

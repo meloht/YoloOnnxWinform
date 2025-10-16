@@ -152,5 +152,62 @@ namespace YoloOnnxWinform.YoloOnnx
 
             return (letterboxImg, padH, padW);
         }
+
+        protected void OptimizedGetAllChannelData(Mat[] channels, float[] data)
+        {
+            if (channels == null || channels.Length == 0)
+                return;
+
+            var dataSpan = data.AsSpan();
+            int index = 0;
+
+            for (int i = 0; i < channels.Length; i++)
+            {
+                var channel = channels[i];
+                int channelSize = channel.Rows * channel.Cols;
+
+                var channelSpan = channel.AsSpan<float>();
+                channelSpan.CopyTo(dataSpan.Slice(index, channelSize));
+
+                index += channelSize;
+            }
+
+            foreach (var item in channels)
+            {
+                item.Dispose();
+            }
+        }
+
+        protected unsafe void ConvertToCHW(Mat image, float[] data)
+        {
+            int height = image.Rows;
+            int width = image.Cols;
+            int channelSize = height * width;
+
+
+            // 使用指针直接访问，避免Split的开销
+            unsafe
+            {
+                float* ptr = (float*)image.Data;
+
+                fixed (float* dataPtr = data)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
+                            int srcIndex = (y * width + x) * 3;
+                            int dstIndexR = y * width + x;
+                            int dstIndexG = dstIndexR + channelSize;
+                            int dstIndexB = dstIndexG + channelSize;
+
+                            dataPtr[dstIndexB] = ptr[srcIndex];     // B
+                            dataPtr[dstIndexG] = ptr[srcIndex + 1]; // G  
+                            dataPtr[dstIndexR] = ptr[srcIndex + 2]; // R
+                        }
+                    }
+                }
+            }
+        }
     }
 }

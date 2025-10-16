@@ -11,16 +11,11 @@ namespace YoloOnnxWinform.YoloWarpper
 {
     public class YoloDetectImplBase
     {
-        protected DataModel DetectImage(string imgPath, IYoloDetect yoloPredictor)
+        protected string DetectImage(string imgPath, IYoloDetect yoloPredictor)
         {
-            DataModel model = new DataModel();
-
             using Mat inputImage = Cv2.ImRead(imgPath);
             var data = yoloPredictor.Run(inputImage);
-
-            model.DetectionResult = GetResult(data);
-
-            return model;
+            return GetResult(data);
         }
         private string GetResult(List<Detection> list)
         {
@@ -28,7 +23,8 @@ namespace YoloOnnxWinform.YoloWarpper
                 return string.Empty;
 
             var dict = list.GroupBy(p => p.ClassName).Select(p => $"{p.Count()} {p.Key}").ToList();
-            return string.Join(", ", dict);
+            string confs = string.Join(", ", list.Select(p => Math.Round(p.Confidence, 2)));
+            return $"{string.Join(", ", dict)} [{confs}]";
         }
         protected void Dispose(IYoloDetect yoloPredictor)
         {
