@@ -33,6 +33,7 @@ namespace YoloOnnxWinform.YoloWarpper
         protected string SaveImage(FileRowItem item, IYoloDetect yoloPredictor)
         {
             using Mat inputImage = Cv2.ImRead(item.FilePath);
+         
             var result = yoloPredictor.Run(inputImage);
             yoloPredictor.DrawDetections(inputImage, result);
             string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
