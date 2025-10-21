@@ -36,16 +36,12 @@ namespace YoloOnnxWinform.YoloOnnx
         {
             _confidenceThres = confidenceThres;
             _iouThres = iouThres;
-            //var options = new SessionOptions
-            //{
-            //    GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL,
-            //    ExecutionMode = ExecutionMode.ORT_SEQUENTIAL,
-            //};
-            //options.EnableCpuMemArena = true;
-            int gpuIdx = GetMainGpu();
+
+            int gpuIdx = GetMainGPU();
             SessionOptions options = new SessionOptions();
             options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
             options.AppendExecutionProvider_DML(gpuIdx);
+
             _session = new InferenceSession(onnxModelPath, options);
             Labels = MapLabelsAndColors(_session);
             var inputMeta = _session.InputMetadata.First();

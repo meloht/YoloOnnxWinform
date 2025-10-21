@@ -29,7 +29,12 @@ namespace YoloOnnxWinform.YoloOnnx
             _onnxModelPath = onnxModelPath;
             _confidenceThres = confidenceThres;
             _iouThres = iouThres;
-            session = new InferenceSession(onnxModelPath);
+            int gpuIdx = GetMainGPU();
+            SessionOptions options = new SessionOptions();
+            options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+            options.AppendExecutionProvider_DML(gpuIdx);
+
+            session = new InferenceSession(onnxModelPath, options);
             Labels = MapLabelsAndColors(session);
             _colorPalette = GenerateColorPalette(Labels.Length);
             var inputMeta = session.InputMetadata.First().Value;
