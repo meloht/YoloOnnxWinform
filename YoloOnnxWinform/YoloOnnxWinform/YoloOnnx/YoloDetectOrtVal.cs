@@ -20,7 +20,7 @@ namespace YoloOnnxWinform.YoloOnnx
         private readonly float _iouThres;
         private readonly LabelModel[] Labels;
         private readonly string InputName;
-      
+
         private InferenceSession _session;
 
         private readonly int _channels;
@@ -36,12 +36,15 @@ namespace YoloOnnxWinform.YoloOnnx
         {
             _confidenceThres = confidenceThres;
             _iouThres = iouThres;
-            var options = new SessionOptions
-            {
-                GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL,
-                ExecutionMode = ExecutionMode.ORT_SEQUENTIAL,
-            };
-            options.EnableCpuMemArena = true;
+            //var options = new SessionOptions
+            //{
+            //    GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL,
+            //    ExecutionMode = ExecutionMode.ORT_SEQUENTIAL,
+            //};
+            //options.EnableCpuMemArena = true;
+            SessionOptions options = new SessionOptions();
+            options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+            options.AppendExecutionProvider_DML(1);
             _session = new InferenceSession(onnxModelPath, options);
             Labels = MapLabelsAndColors(_session);
             var inputMeta = _session.InputMetadata.First();
@@ -61,7 +64,7 @@ namespace YoloOnnxWinform.YoloOnnx
             var _ortIoBinding = _session.CreateIoBinding();
 
             _colorPalette = GenerateColorPalette(Labels.Length);
-           
+
 
             InputShape = new long[]
               {
@@ -74,7 +77,7 @@ namespace YoloOnnxWinform.YoloOnnx
             RentDataInt(_session.InputMetadata[InputName].Dimensions);
         }
 
-      
+
 
         private List<Output> GetOutputShapes()
         {
@@ -95,7 +98,7 @@ namespace YoloOnnxWinform.YoloOnnx
 
             return Input.Shape(dimensions);
         }
-      
+
         private List<Detection> Postprocess(Mat inputImage, OrtValue ortTensor, int padTop, int padLeft)
         {
             var ortSpan = ortTensor.GetTensorDataAsSpan<float>();
@@ -197,9 +200,9 @@ namespace YoloOnnxWinform.YoloOnnx
 
             //// 转换为CHW格式 (3, H, W)
             //var channels = paddedImg.Split();
-  
+
             float[] data = base.rentData;
-            ConvertToCHW(paddedImg,data);
+            ConvertToCHW(paddedImg, data);
             //OptimizedGetAllChannelData(channels, data);
             paddedImg.Dispose();
             // 添加批次维度 (1, 3, H, W)
