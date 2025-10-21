@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using static System.Windows.Forms.Design.AxImporter;
 
 
 
@@ -22,6 +23,7 @@ namespace YoloOnnxWinform.YoloOnnx
         private readonly string InputName;
 
         private InferenceSession _session;
+        private SessionOptions _options;
 
         private readonly int _channels;
         private readonly int _channels2;
@@ -38,11 +40,11 @@ namespace YoloOnnxWinform.YoloOnnx
             _iouThres = iouThres;
 
             int gpuIdx = GetMainGPU();
-            SessionOptions options = new SessionOptions();
-            options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
-            options.AppendExecutionProvider_DML(gpuIdx);
+            _options = new SessionOptions();
+            _options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+            _options.AppendExecutionProvider_DML(gpuIdx);
 
-            _session = new InferenceSession(onnxModelPath, options);
+            _session = new InferenceSession(onnxModelPath, _options);
             Labels = MapLabelsAndColors(_session);
             var inputMeta = _session.InputMetadata.First();
             InputName = _session.InputNames[0];
@@ -230,6 +232,7 @@ namespace YoloOnnxWinform.YoloOnnx
         public void Dispose()
         {
             _session.Dispose();
+            _options.Dispose();
             GC.SuppressFinalize(this);
         }
     }

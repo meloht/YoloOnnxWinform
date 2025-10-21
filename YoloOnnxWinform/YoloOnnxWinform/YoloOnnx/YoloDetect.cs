@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Windows.Forms.Design.AxImporter;
 
 
 namespace YoloOnnxWinform.YoloOnnx
@@ -22,6 +23,7 @@ namespace YoloOnnxWinform.YoloOnnx
         private readonly LabelModel[] Labels;
 
         private InferenceSession session;
+        private SessionOptions _options;
         private bool disposedValue;
 
         public YoloDetect(string onnxModelPath, float confidenceThres, float iouThres)
@@ -30,11 +32,11 @@ namespace YoloOnnxWinform.YoloOnnx
             _confidenceThres = confidenceThres;
             _iouThres = iouThres;
             int gpuIdx = GetMainGPU();
-            SessionOptions options = new SessionOptions();
-            options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
-            options.AppendExecutionProvider_DML(gpuIdx);
+            _options = new SessionOptions();
+            _options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+            _options.AppendExecutionProvider_DML(gpuIdx);
 
-            session = new InferenceSession(onnxModelPath, options);
+            session = new InferenceSession(onnxModelPath, _options);
             Labels = MapLabelsAndColors(session);
             _colorPalette = GenerateColorPalette(Labels.Length);
             var inputMeta = session.InputMetadata.First().Value;
@@ -254,6 +256,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
                 session.Dispose();
+                _options.Dispose();
                 session = null;
                 disposedValue = true;
             }
