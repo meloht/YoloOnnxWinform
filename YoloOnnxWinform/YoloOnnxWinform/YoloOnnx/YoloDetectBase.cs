@@ -3,8 +3,10 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace YoloOnnxWinform.YoloOnnx
 {
@@ -208,6 +210,35 @@ namespace YoloOnnxWinform.YoloOnnx
                     }
                 }
             }
+        }
+
+
+        public int GetMainGpu()
+        {
+            try
+            {
+                ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_VideoController");
+                int idx = 0;
+                foreach (ManagementObject mo in searcher.Get())
+                {
+                    string name = mo["Name"]?.ToString() ?? "";
+                    if (name != null && name.ToUpper().Contains("NVIDIA"))
+                    {
+                        return idx;
+                    }
+                    string description = mo["Description"]?.ToString() ?? "";
+                    if (description != null && description.ToUpper().Contains("NVIDIA"))
+                    {
+                        return idx;
+                    }
+                    idx++;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+            return 0;
         }
     }
 }
