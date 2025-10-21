@@ -217,17 +217,19 @@ namespace YoloOnnxWinform.YoloOnnx
         {
             try
             {
+
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_VideoController");
                 int idx = 0;
+                HashSet<string> set = ["NVIDIA", "GEFORCE", "AMD", "RADEON"];
                 foreach (ManagementObject mo in searcher.Get())
                 {
                     string name = mo["Name"]?.ToString() ?? "";
-                    if (name != null && name.ToUpper().Contains("NVIDIA"))
+                    if (name != null && set.Contains(name.Trim().ToUpper()))
                     {
                         return idx;
                     }
                     string description = mo["Description"]?.ToString() ?? "";
-                    if (description != null && description.ToUpper().Contains("NVIDIA"))
+                    if (description != null && set.Contains(description.Trim().ToUpper()))
                     {
                         return idx;
                     }
