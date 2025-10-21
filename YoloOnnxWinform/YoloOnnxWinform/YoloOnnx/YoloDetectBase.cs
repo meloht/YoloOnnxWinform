@@ -217,7 +217,6 @@ namespace YoloOnnxWinform.YoloOnnx
         {
             try
             {
-
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_VideoController");
                 int idx = 0;
                 string[] set = ["NVIDIA", "GEFORCE", "AMD", "RADEON"];
