@@ -186,13 +186,9 @@ namespace YoloOnnxWinform.YoloOnnx
         }
         private (float[] data, int top, int left) Preprocess(Mat inputImage)
         {
-            // BGR转RGB
-            using Mat rgbImg = new Mat();
-
-            Cv2.CvtColor(inputImage, rgbImg, ColorConversionCodes.BGR2RGB);
-
+         
             // Letterbox处理
-            (Mat paddedImg, int top, int left) = LetterboxFor1280(rgbImg);
+            (Mat paddedImg, int top, int left) = LetterboxFor1280(inputImage);
 
             // 归一化并转换为float数组
             paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);

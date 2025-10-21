@@ -105,11 +105,15 @@ namespace YoloOnnxWinform.YoloOnnx
             // 标签文本
             Cv2.PutText(img, label, labelTop, HersheyFonts.HersheySimplex, fontScale, Scalar.White, fontThick, LineTypes.AntiAlias);
         }
-        protected (Mat letterboxImg, int topPad, int leftPad) LetterboxFor1280(Mat img)
+        protected (Mat letterboxImg, int topPad, int leftPad) LetterboxFor1280(Mat inputImage)
         {
+            // BGR转RGB
+            using Mat rgbImg = new Mat();
+
+            Cv2.CvtColor(inputImage, rgbImg, ColorConversionCodes.BGR2RGB);
             // 1. 获取原始图像尺寸
-            int imgH = img.Rows;
-            int imgW = img.Cols;
+            int imgH = rgbImg.Rows;
+            int imgW = rgbImg.Cols;
 
             // 2. 计算缩放比例（按最小比例缩放，避免图像畸变）
             float scale = Math.Min((float)InputHeight / imgH, (float)InputWidth / imgW);
@@ -123,15 +127,12 @@ namespace YoloOnnxWinform.YoloOnnx
             int padH = (InputHeight - newImgH) / 2; // 上下填充的一半
 
             // 5. 缩放图像（若原始尺寸≠缩放后尺寸）
-            Mat resizedImg = new Mat();
+            using Mat resizedImg = rgbImg;
             if (imgW != newImgW || imgH != newImgH)
             {
-                Cv2.Resize(img, resizedImg, new OpenCvSharp.Size(newImgW, newImgH), interpolation: InterpolationFlags.Linear);
+                Cv2.Resize(rgbImg, resizedImg, new OpenCvSharp.Size(newImgW, newImgH), interpolation: InterpolationFlags.Linear);
             }
-            else
-            {
-                resizedImg = img.Clone();
-            }
+          
 
             // 6. 填充到 1280×1280（用 114 填充，YOLO 常用默认值）
             Mat letterboxImg = new Mat();
@@ -145,7 +146,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 borderType: BorderTypes.Constant,
                 value: _paddingColor // 填充色（BGR 格式）
             );
-            resizedImg.Dispose();
+           
             // 关键检查：确保填充后尺寸严格为 1280×1280
             if (letterboxImg.Rows != InputHeight || letterboxImg.Cols != InputWidth)
             {
