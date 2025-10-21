@@ -207,7 +207,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(2, 3, 2, 3);
             Name = "FormYoloDetect";
-            Text = "FormYoloDetect CPU-based inference";
+            Text = "FormYoloDetect GPU DirectML-based inference";
             FormClosing += FormYoloDetect_FormClosing;
             Load += FormYoloDetect_Load;
             panel1.ResumeLayout(false);
