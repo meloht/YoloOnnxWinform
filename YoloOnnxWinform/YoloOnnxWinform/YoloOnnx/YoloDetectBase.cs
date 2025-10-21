@@ -29,7 +29,7 @@ namespace YoloOnnxWinform.YoloOnnx
             int len = 1;
             foreach (var item in dimensions)
             {
-                len = len * item;
+                len *= item;
             }
             rentData = new float[len];
         }
