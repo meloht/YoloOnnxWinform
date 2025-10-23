@@ -215,6 +215,7 @@ namespace YoloOnnxWinform.YoloOnnx
             using var runOptions = new RunOptions();
             // 执行推理
             using var outputs = _session.Run(runOptions, [InputName], [inputOrtValue], _session.OutputNames);
+            ArrayPool<float>.Shared.Return(model.Data);
             using var output0 = outputs[0];
             Postprocess(output0.GetTensorDataAsSpan<float>(), model);
         }

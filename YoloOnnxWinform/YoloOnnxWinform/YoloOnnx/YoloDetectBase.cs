@@ -1,6 +1,7 @@
 ﻿using Microsoft.ML.OnnxRuntime;
 using OpenCvSharp;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -19,13 +20,14 @@ namespace YoloOnnxWinform.YoloOnnx
         protected int InputHeight;
         protected readonly Scalar _paddingColor;
         protected float[] rentData;
-        protected float[][] rentDataArr;
+
         private int arrCount = 20;
         private Thread _thread;
         private List<ImagePreprocessModel> _listImg = new List<ImagePreprocessModel>();
         private volatile bool _isStart = true;
         protected BindingList<DataModel> _listName = new BindingList<DataModel>();
         protected Dictionary<string, string> _dict = new Dictionary<string, string>();
+        private int _len = 0;
         int _idx = 0;
         public YoloDetectBase()
         {
@@ -38,6 +40,7 @@ namespace YoloOnnxWinform.YoloOnnx
         {
             StopLoad();
             ImageListClear();
+            LoadImg(0);
             _thread = null;
             _isStart = true;
             _thread = new Thread(PreLoadImage);
@@ -47,17 +50,13 @@ namespace YoloOnnxWinform.YoloOnnx
 
         protected void RentDataInt(int[] dimensions)
         {
-            int len = 1;
+            _len = 1;
             foreach (var item in dimensions)
             {
-                len *= item;
+                _len *= item;
             }
-            rentData = new float[len];
-            rentDataArr = new float[arrCount][];
-            for (int i = 0; i < arrCount; i++)
-            {
-                rentDataArr[i] = new float[len];
-            }
+            rentData = new float[_len];
+           
 
         }
         protected LabelModel[] MapLabelsAndColors(InferenceSession session)
@@ -261,7 +260,7 @@ namespace YoloOnnxWinform.YoloOnnx
             return (data, top, left);
         }
 
-        protected ImagePreprocessModel PreprocessBatch(Mat inputImage, float[] data, DataModel model)
+        protected ImagePreprocessModel PreprocessBatch(Mat inputImage, DataModel model)
         {
             // Letterbox处理
             (Mat paddedImg, int top, int left) = LetterboxFor1280(inputImage);
@@ -270,6 +269,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 // 归一化并转换为float数组
                 paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
 
+                float[] data = ArrayPool<float>.Shared.Rent(_len);
                 ConvertToCHW(paddedImg, data);
 
                 // 添加批次维度 (1, 3, H, W)
@@ -352,13 +352,9 @@ namespace YoloOnnxWinform.YoloOnnx
         {
             lock (_listImg)
             {
-                if (_listImg.Count == arrCount || _idx == _listName.Count )
-                {
-                    var arr = _listImg.ToArray();
-                    _listImg.Clear();
-                    return arr;
-                }
-                return [];
+                var arr = _listImg.ToArray();
+                _listImg.Clear();
+                return arr;
             }
         }
         private void ImageListClear()
@@ -370,7 +366,7 @@ namespace YoloOnnxWinform.YoloOnnx
         }
         private void PreLoadImage()
         {
-            _idx = 0;
+            _idx = 1;
             while (_isStart)
             {
                 if (ImageListIsEmpty())
@@ -380,7 +376,7 @@ namespace YoloOnnxWinform.YoloOnnx
                     {
                         if (!_isStart)
                             break;
-                        LoadImg(_idx, rentDataArr[i]);
+                        LoadImg(_idx);
                     }
                 }
 
@@ -388,14 +384,14 @@ namespace YoloOnnxWinform.YoloOnnx
             }
         }
 
-        private void LoadImg(int idx, float[] arr)
+        private void LoadImg(int idx)
         {
             string key = _listName[idx].FileName;
 
             string imgPath = _dict[key];
 
             using Mat inputImage = Cv2.ImRead(imgPath);
-            var data = PreprocessBatch(inputImage, arr, _listName[idx]);
+            var data = PreprocessBatch(inputImage, _listName[idx]);
             ImageListAdd(data);
         }
 
