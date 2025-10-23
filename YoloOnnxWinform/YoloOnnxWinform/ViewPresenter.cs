@@ -118,7 +118,7 @@ namespace YoloOnnxWinform
             int idx = 0;
             int total = _bindingSource.Count;
 
-            for (int i = 0; i < total; i++)
+            for (; idx < total; )
             {
                 var list = yolo.GetPreLoadImages();
                 foreach (var item1 in list)
@@ -137,13 +137,12 @@ namespace YoloOnnxWinform
                     {
                         ShowError(item1.model, ex.Message);
                     }
-
                     idx++;
-
                     _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");
                 }
+                Thread.Sleep(50);
             }
-            _formProgress.ShowProgress(100 / total, $"{idx}/{total}");
+           
         }
 
 

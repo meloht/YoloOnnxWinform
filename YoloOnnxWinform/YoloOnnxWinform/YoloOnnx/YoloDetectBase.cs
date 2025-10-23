@@ -19,12 +19,14 @@ namespace YoloOnnxWinform.YoloOnnx
         protected int InputHeight;
         protected readonly Scalar _paddingColor;
         protected float[] rentData;
+        protected float[][] rentDataArr;
+        private int arrCount = 20;
         private Thread _thread;
         private List<ImagePreprocessModel> _listImg = new List<ImagePreprocessModel>();
         private volatile bool _isStart = true;
         protected BindingList<DataModel> _listName = new BindingList<DataModel>();
         protected Dictionary<string, string> _dict = new Dictionary<string, string>();
-
+        int _idx = 0;
         public YoloDetectBase()
         {
             _paddingColor = new Scalar(114, 114, 114);
@@ -36,7 +38,7 @@ namespace YoloOnnxWinform.YoloOnnx
         {
             StopLoad();
             ImageListClear();
-            LoadImg(0);
+            LoadImg(0, rentData);
             _thread = null;
             _isStart = true;
             _thread = new Thread(PreLoadImage);
@@ -52,6 +54,12 @@ namespace YoloOnnxWinform.YoloOnnx
                 len *= item;
             }
             rentData = new float[len];
+            rentDataArr = new float[arrCount][];
+            for (int i = 0; i < arrCount; i++)
+            {
+                rentDataArr[i] = new float[len];
+            }
+
         }
         protected LabelModel[] MapLabelsAndColors(InferenceSession session)
         {
@@ -254,7 +262,7 @@ namespace YoloOnnxWinform.YoloOnnx
             return (data, top, left);
         }
 
-        protected ImagePreprocessModel PreprocessBatch(Mat inputImage, DataModel model)
+        protected ImagePreprocessModel PreprocessBatch(Mat inputImage, float[] data, DataModel model)
         {
             // Letterbox处理
             (Mat paddedImg, int top, int left) = LetterboxFor1280(inputImage);
@@ -263,7 +271,6 @@ namespace YoloOnnxWinform.YoloOnnx
                 // 归一化并转换为float数组
                 paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
 
-                float[] data = new float[rentData.Length];
                 ConvertToCHW(paddedImg, data);
 
                 // 添加批次维度 (1, 3, H, W)
@@ -346,9 +353,13 @@ namespace YoloOnnxWinform.YoloOnnx
         {
             lock (_listImg)
             {
-                var arr = _listImg.ToArray();
-                _listImg.Clear();
-                return arr;
+                if (_listImg.Count == arrCount || _idx == _listName.Count || _idx == 1)
+                {
+                    var arr = _listImg.ToArray();
+                    _listImg.Clear();
+                    return arr;
+                }
+                return [];
             }
         }
         private void ImageListClear()
@@ -360,32 +371,32 @@ namespace YoloOnnxWinform.YoloOnnx
         }
         private void PreLoadImage()
         {
-            int idx = 1;
+            _idx = 1;
             while (_isStart)
             {
                 if (ImageListIsEmpty())
                 {
 
-                    for (int i = 0; idx < _listName.Count && i < 50; idx++, i++)
+                    for (int i = 0; _idx < _listName.Count && i < arrCount; _idx++, i++)
                     {
                         if (!_isStart)
                             break;
-                        LoadImg(idx);
+                        LoadImg(_idx, rentDataArr[i]);
                     }
                 }
 
-                Thread.Sleep(100);
+                Thread.Sleep(50);
             }
         }
 
-        private void LoadImg(int idx)
+        private void LoadImg(int idx, float[] arr)
         {
             string key = _listName[idx].FileName;
 
             string imgPath = _dict[key];
 
             using Mat inputImage = Cv2.ImRead(imgPath);
-            var data = PreprocessBatch(inputImage, _listName[idx]);
+            var data = PreprocessBatch(inputImage, arr, _listName[idx]);
             ImageListAdd(data);
         }
 
