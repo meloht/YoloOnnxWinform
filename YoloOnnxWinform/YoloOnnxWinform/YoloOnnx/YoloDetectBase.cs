@@ -38,7 +38,6 @@ namespace YoloOnnxWinform.YoloOnnx
         {
             StopLoad();
             ImageListClear();
-            LoadImg(0, rentData);
             _thread = null;
             _isStart = true;
             _thread = new Thread(PreLoadImage);
@@ -353,7 +352,7 @@ namespace YoloOnnxWinform.YoloOnnx
         {
             lock (_listImg)
             {
-                if (_listImg.Count == arrCount || _idx == _listName.Count || _idx == 1)
+                if (_listImg.Count == arrCount || _idx == _listName.Count )
                 {
                     var arr = _listImg.ToArray();
                     _listImg.Clear();
@@ -371,7 +370,7 @@ namespace YoloOnnxWinform.YoloOnnx
         }
         private void PreLoadImage()
         {
-            _idx = 1;
+            _idx = 0;
             while (_isStart)
             {
                 if (ImageListIsEmpty())
