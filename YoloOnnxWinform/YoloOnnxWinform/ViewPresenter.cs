@@ -1,6 +1,7 @@
 ﻿
 
 
+using Microsoft.ML.OnnxRuntime;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using YoloOnnxWinform.YoloWarpper;
 
 
 namespace YoloOnnxWinform
@@ -18,10 +21,10 @@ namespace YoloOnnxWinform
     {
         IFormProgress _formProgress;
 
-
         protected BindingList<DataModel> _bindingSource = new BindingList<DataModel>();
         protected Dictionary<string, string> _dictFile = [];
         private System.Diagnostics.Stopwatch _stopwatch = new System.Diagnostics.Stopwatch();
+
 
         public ViewPresenter(IFormProgress progress)
         {
@@ -46,6 +49,8 @@ namespace YoloOnnxWinform
                 return;
             }
             _formProgress.DataGridList.DataSource = _bindingSource;
+
+
         }
 
         protected void AddColumn(string colName, int width, DataGridView dataGridView)
@@ -71,6 +76,11 @@ namespace YoloOnnxWinform
 
         public void Process(IYoloModel yoloPredictor)
         {
+            if (yoloPredictor is IYoloExt)
+            {
+                ProcessParallel(yoloPredictor);
+                return;
+            }
             int idx = 0;
             int total = _bindingSource.Count;
 
@@ -100,6 +110,43 @@ namespace YoloOnnxWinform
 
             _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");
         }
+
+        private void ProcessParallel(IYoloModel yoloPredictor)
+        {
+            IYoloExt yolo = (IYoloExt)yoloPredictor;
+            yolo.PreLoadImages(_bindingSource, _dictFile);
+            int idx = 0;
+            int total = _bindingSource.Count;
+
+            for (int i = 0; i < total; i++)
+            {
+                var list = yolo.GetPreLoadImages();
+                foreach (var item1 in list)
+                {
+                    try
+                    {
+                        _stopwatch.Start();
+                        yolo.Run(item1);
+
+                        _stopwatch.Stop();
+                        item1.model.ExecuteTime = $"{_stopwatch.Elapsed.TotalMilliseconds}ms";
+                        _stopwatch.Reset();
+                      
+                    }
+                    catch (Exception ex)
+                    {
+                        ShowError(item1.model, ex.Message);
+                    }
+
+                    idx++;
+
+                    _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");
+                }
+            }
+            _formProgress.ShowProgress(100 / total, $"{idx}/{total}");
+        }
+
+
 
         private void GetDetectResult(IYoloModel yoloPredictor, DataModel model, string filePath)
         {
@@ -145,5 +192,7 @@ namespace YoloOnnxWinform
             item.ExecuteTime = model.ExecuteTime;
 
         }
+
+
     }
 }

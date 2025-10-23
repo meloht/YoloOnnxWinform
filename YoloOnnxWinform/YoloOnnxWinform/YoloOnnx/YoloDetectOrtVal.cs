@@ -4,6 +4,7 @@ using OpenCvSharp.Dnn;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Channels;
@@ -39,10 +40,7 @@ namespace YoloOnnxWinform.YoloOnnx
             _confidenceThres = confidenceThres;
             _iouThres = iouThres;
 
-            int gpuIdx = GetMainGPU();
-            _options = new SessionOptions();
-            _options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
-            _options.AppendExecutionProvider_DML(gpuIdx);
+            _options = BuildSessionOptions();
 
             _session = new InferenceSession(onnxModelPath, _options);
             Labels = MapLabelsAndColors(_session);
@@ -98,12 +96,8 @@ namespace YoloOnnxWinform.YoloOnnx
             return Input.Shape(dimensions);
         }
 
-        private List<Detection> Postprocess(Mat inputImage, OrtValue ortTensor, int padTop, int padLeft)
+        private List<Detection> Postprocess(int imageHeight, int imageWidth, ReadOnlySpan<float> ortSpan, int padTop, int padLeft)
         {
-            var ortSpan = ortTensor.GetTensorDataAsSpan<float>();
-
-            int imageHeight = inputImage.Height;
-            int imageWidth = inputImage.Width;
             List<Rect> boxes = new List<Rect>();
             List<float> scores = new List<float>();
             List<int> class_ids = new List<int>();
@@ -184,42 +178,23 @@ namespace YoloOnnxWinform.YoloOnnx
 
             return results;
         }
-        private (float[] data, int top, int left) Preprocess(Mat inputImage)
-        {
-         
-            // Letterbox处理
-            (Mat paddedImg, int top, int left) = LetterboxFor1280(inputImage);
 
-            // 归一化并转换为float数组
-            paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
-
-            //// 转换为CHW格式 (3, H, W)
-            //var channels = paddedImg.Split();
-
-            float[] data = base.rentData;
-            ConvertToCHW(paddedImg, data);
-            //OptimizedGetAllChannelData(channels, data);
-            paddedImg.Dispose();
-            // 添加批次维度 (1, 3, H, W)
-            return (data, top, left);
-        }
 
 
         public List<Detection> Run(Mat inputImage)
         {
             // 预处理图像
-            (float[] inputData, int top, int left) = Preprocess(inputImage);
+            var imgData = Preprocess(inputImage);
 
-            using var inputOrtValue = OrtValue.CreateTensorValueFromMemory(inputData, InputShape);
+            using var inputOrtValue = OrtValue.CreateTensorValueFromMemory(imgData.OutData, InputShape);
 
             using var runOptions = new RunOptions();
             // 执行推理
             using var outputs = _session.Run(runOptions, [InputName], [inputOrtValue], _session.OutputNames);
-            using var output_0 = outputs[0];
+            using var output0 = outputs[0];
 
-            //ArrayPool<float>.Shared.Return(inputData);
             // 后处理
-            var result = Postprocess(inputImage, output_0, top, left);
+            var result = Postprocess(inputImage.Height, inputImage.Width, output0.GetTensorDataAsSpan<float>(), imgData.TopPad, imgData.LeftPad);
 
 
             return result;
@@ -227,9 +202,45 @@ namespace YoloOnnxWinform.YoloOnnx
 
         public void Dispose()
         {
+            StopLoad();
             _session.Dispose();
             _options.Dispose();
             GC.SuppressFinalize(this);
+        }
+
+        public void Run(ImagePreprocessModel model)
+        {
+            using var inputOrtValue = OrtValue.CreateTensorValueFromMemory(model.Data, InputShape);
+
+            using var runOptions = new RunOptions();
+            // 执行推理
+            using var outputs = _session.Run(runOptions, [InputName], [inputOrtValue], _session.OutputNames);
+            using var output0 = outputs[0];
+            Postprocess(output0.GetTensorDataAsSpan<float>(), model);
+        }
+
+        public void Postprocess(ReadOnlySpan<float> ortTensor, ImagePreprocessModel imageData)
+        {
+            var list = Postprocess(imageData.imageHeight, imageData.imageWidth, ortTensor, imageData.TopPad, imageData.LeftPad);
+            imageData.model.DetectionResult = Utils.GetResult(list);
+
+        }
+
+        public void PreLoadImages(BindingList<DataModel> list, Dictionary<string, string> dict)
+        {
+            base._listName = list;
+            base._dict = dict;
+            Start();
+        }
+
+        public ImagePreprocessModel[] GetPreLoadImages()
+        {
+            return GetPreImgs();
+        }
+
+        public void EndPreload()
+        {
+            StopLoad();
         }
     }
 }

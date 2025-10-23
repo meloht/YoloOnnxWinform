@@ -7,6 +7,7 @@ using OpenCvSharp.Dnn;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,10 +32,8 @@ namespace YoloOnnxWinform.YoloOnnx
             _onnxModelPath = onnxModelPath;
             _confidenceThres = confidenceThres;
             _iouThres = iouThres;
-            int gpuIdx = GetMainGPU();
-            _options = new SessionOptions();
-            _options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
-            _options.AppendExecutionProvider_DML(gpuIdx);
+
+            _options = BuildSessionOptions();
 
             session = new InferenceSession(onnxModelPath, _options);
             Labels = MapLabelsAndColors(session);
@@ -47,29 +46,9 @@ namespace YoloOnnxWinform.YoloOnnx
             RentDataInt(inputDims);
         }
 
-      
 
-        private (float[] data, int topPad, int leftPad) Preprocess(Mat inputImage)
-        {
-            // Letterbox处理
-            (Mat paddedImg, int topPad, int leftPad) = LetterboxFor1280(inputImage);
 
-            // 归一化并转换为float数组
-            paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
 
-            // 转换为CHW格式 (3, H, W)
-            var channels = paddedImg.Split();
-          
-            int channelSize = paddedImg.Height * paddedImg.Width;
-
-            float[] data = base.rentData;
-
-            OptimizedGetAllChannelData(channels, data);
-
-            paddedImg.Dispose();
-            // 添加批次维度 (1, 3, H, W)
-            return (data, topPad, leftPad);
-        }
 
         private float[,] ProcessTensorOutput(Tensor<float> outputTensor)
         {
@@ -122,10 +101,8 @@ namespace YoloOnnxWinform.YoloOnnx
             }
         }
 
-        private List<Detection> Postprocess(Mat inputImage, Microsoft.ML.OnnxRuntime.Tensors.Tensor<float> outputTensor, int topPad, int leftPad)
+        private List<Detection> Postprocess(int imageHeight, int imageWidth, Tensor<float> outputTensor, int topPad, int leftPad)
         {
-            int imageHeight = inputImage.Rows;
-            int imageWidth = inputImage.Cols;
             // Transpose and squeeze the output to match the expected shape
             var processedOutput = ProcessTensorOutput(outputTensor);
 
@@ -215,14 +192,11 @@ namespace YoloOnnxWinform.YoloOnnx
             var inputMeta = session.InputMetadata.First().Value;
             var inputDims = inputMeta.Dimensions;
 
-            int imageHeight = inputImage.Rows;
-            int imageWidth = inputImage.Cols;
-
             // 预处理图像
-            (float[] inputData, int topPad, int leftPad) = Preprocess(inputImage);
+            var imgData = Preprocess(inputImage);
             string inputName = session.InputNames[0];
             // 准备输入
-            var inputTensor = new DenseTensor<float>(inputData, inputDims);
+            var inputTensor = new DenseTensor<float>(imgData.OutData, inputDims);
             var inputs = new List<NamedOnnxValue>
             {
                 NamedOnnxValue.CreateFromTensor(inputName, inputTensor)
@@ -233,42 +207,62 @@ namespace YoloOnnxWinform.YoloOnnx
             var outputTensor = outputs[0].AsTensor<float>();
 
             // 后处理
-            var result = Postprocess(inputImage, outputTensor, topPad, leftPad);
+            var result = Postprocess(inputImage.Height, inputImage.Width, outputTensor, imgData.TopPad, imgData.LeftPad);
 
 
             return result;
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-                }
 
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
-                session.Dispose();
-                _options.Dispose();
-                session = null;
-                disposedValue = true;
-            }
-        }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~YoloDetect()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
+            StopLoad();
+            session.Dispose();
+            _options.Dispose();
             GC.SuppressFinalize(this);
+        }
+
+        public void Run(ImagePreprocessModel model)
+        {
+            var inputMeta = session.InputMetadata.First().Value;
+            var inputDims = inputMeta.Dimensions;
+            string inputName = session.InputNames[0];
+            // 准备输入
+            var inputTensor = new DenseTensor<float>(model.Data, inputDims);
+            var inputs = new List<NamedOnnxValue>
+            {
+                NamedOnnxValue.CreateFromTensor(inputName, inputTensor)
+            };
+
+            // 执行推理
+            using var outputs = session.Run(inputs);
+            Tensor<float> outputTensor = outputs[0].AsTensor<float>();
+            Postprocess(outputTensor, model);
+
+        }
+
+        public void Postprocess(Tensor<float> ortTensor, ImagePreprocessModel imageData)
+        {
+            var list = Postprocess(imageData.imageHeight, imageData.imageWidth, ortTensor, imageData.TopPad, imageData.LeftPad);
+            imageData.model.DetectionResult = Utils.GetResult(list);
+        }
+
+        public void PreLoadImages(BindingList<DataModel> list, Dictionary<string, string> dict)
+        {
+            base._listName = list;
+            base._dict = dict;
+            Start();
+        }
+
+        public ImagePreprocessModel[] GetPreLoadImages()
+        {
+            return GetPreImgs();
+        }
+
+        public void EndPreload()
+        {
+            StopLoad();
         }
     }
 }

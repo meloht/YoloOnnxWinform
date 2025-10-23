@@ -98,6 +98,11 @@ namespace YoloOnnxWinform
                     _stopwatch.Stop();
                     this.lblTimeCost.Text = _stopwatch.Elapsed.ToString();
                     _stopwatch.Reset();
+                    if (this._yoloPredictor is IYoloExt)
+                    {
+                        ((IYoloExt)_yoloPredictor).EndPreload();
+                    }
+                   
                     MessageBox.Show("Image processing completed!");
                 }
             }));

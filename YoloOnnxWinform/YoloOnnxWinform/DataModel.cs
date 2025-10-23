@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -60,4 +61,7 @@ namespace YoloOnnxWinform
             }
         }
     }
+
+
+    public record ImagePreprocessModel(int imageHeight, int imageWidth, DataModel model, float[] Data, int TopPad, int LeftPad);
 }

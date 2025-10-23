@@ -2,11 +2,13 @@
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Management;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static System.Windows.Forms.Design.AxImporter;
 
 namespace YoloOnnxWinform.YoloOnnx
 {
@@ -17,12 +19,30 @@ namespace YoloOnnxWinform.YoloOnnx
         protected int InputHeight;
         protected readonly Scalar _paddingColor;
         protected float[] rentData;
+        private Thread _thread;
+        private List<ImagePreprocessModel> _listImg = new List<ImagePreprocessModel>();
+        private volatile bool _isStart = true;
+        protected BindingList<DataModel> _listName = new BindingList<DataModel>();
+        protected Dictionary<string, string> _dict = new Dictionary<string, string>();
 
         public YoloDetectBase()
         {
             _paddingColor = new Scalar(114, 114, 114);
+
+
         }
 
+        protected void Start()
+        {
+            StopLoad();
+            ImageListClear();
+            LoadImg(0);
+            _thread = null;
+            _isStart = true;
+            _thread = new Thread(PreLoadImage);
+            _thread.IsBackground = true;
+            _thread.Start();
+        }
 
         protected void RentDataInt(int[] dimensions)
         {
@@ -132,7 +152,7 @@ namespace YoloOnnxWinform.YoloOnnx
             {
                 Cv2.Resize(rgbImg, resizedImg, new OpenCvSharp.Size(newImgW, newImgH), interpolation: InterpolationFlags.Linear);
             }
-          
+
 
             // 6. 填充到 1280×1280（用 114 填充，YOLO 常用默认值）
             Mat letterboxImg = new Mat();
@@ -146,7 +166,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 borderType: BorderTypes.Constant,
                 value: _paddingColor // 填充色（BGR 格式）
             );
-           
+
             // 关键检查：确保填充后尺寸严格为 1280×1280
             if (letterboxImg.Rows != InputHeight || letterboxImg.Cols != InputWidth)
             {
@@ -214,7 +234,59 @@ namespace YoloOnnxWinform.YoloOnnx
         }
 
 
-        public int GetMainGPU()
+        protected (float[] OutData, int TopPad, int LeftPad) Preprocess(Mat inputImage)
+        {
+
+            // Letterbox处理
+            (Mat paddedImg, int top, int left) = LetterboxFor1280(inputImage);
+
+            // 归一化并转换为float数组
+            paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
+
+            //// 转换为CHW格式 (3, H, W)
+            //var channels = paddedImg.Split();
+
+            float[] data = rentData;
+            ConvertToCHW(paddedImg, data);
+            //OptimizedGetAllChannelData(channels, data);
+            paddedImg.Dispose();
+            // 添加批次维度 (1, 3, H, W)
+            return (data, top, left);
+        }
+
+        protected ImagePreprocessModel PreprocessBatch(Mat inputImage, DataModel model)
+        {
+            // Letterbox处理
+            (Mat paddedImg, int top, int left) = LetterboxFor1280(inputImage);
+            using (paddedImg)
+            {
+                // 归一化并转换为float数组
+                paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
+
+                float[] data = new float[rentData.Length];
+                ConvertToCHW(paddedImg, data);
+
+                // 添加批次维度 (1, 3, H, W)
+                return new ImagePreprocessModel(inputImage.Height, inputImage.Width, model, data, top, left);
+            }
+
+        }
+
+        protected SessionOptions BuildSessionOptions()
+        {
+            SessionOptions session = new SessionOptions();
+            session.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+            int gpuIdx = GetMainGPU();
+            if (gpuIdx == 0)
+            {
+                return session;
+            }
+
+            session.AppendExecutionProvider_DML(gpuIdx);
+            return session;
+
+        }
+        private int GetMainGPU()
         {
             try
             {
@@ -224,7 +296,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 foreach (ManagementObject mo in searcher.Get())
                 {
                     string name = mo["Name"]?.ToString() ?? "";
-                    if (IsContain(name,set))
+                    if (IsContain(name, set))
                     {
                         return idx;
                     }
@@ -255,6 +327,75 @@ namespace YoloOnnxWinform.YoloOnnx
                 }
             }
             return false;
+        }
+        private bool ImageListIsEmpty()
+        {
+            lock (_listImg)
+            {
+                return _listImg.Count == 0;
+            }
+        }
+        private void ImageListAdd(ImagePreprocessModel model)
+        {
+            lock (_listImg)
+            {
+                _listImg.Add(model);
+            }
+        }
+        protected ImagePreprocessModel[] GetPreImgs()
+        {
+            lock (_listImg)
+            {
+                var arr = _listImg.ToArray();
+                _listImg.Clear();
+                return arr;
+            }
+        }
+        private void ImageListClear()
+        {
+            lock (_listImg)
+            {
+                _listImg.Clear();
+            }
+        }
+        private void PreLoadImage()
+        {
+            int idx = 1;
+            while (_isStart)
+            {
+                if (ImageListIsEmpty())
+                {
+
+                    for (int i = 0; idx < _listName.Count && i < 50; idx++, i++)
+                    {
+                        if (!_isStart)
+                            break;
+                        LoadImg(idx);
+                    }
+                }
+
+                Thread.Sleep(100);
+            }
+        }
+
+        private void LoadImg(int idx)
+        {
+            string key = _listName[idx].FileName;
+
+            string imgPath = _dict[key];
+
+            using Mat inputImage = Cv2.ImRead(imgPath);
+            var data = PreprocessBatch(inputImage, _listName[idx]);
+            ImageListAdd(data);
+        }
+
+        protected void StopLoad()
+        {
+            _isStart = false;
+            if (_thread != null && _thread.IsAlive)
+            {
+                _thread.Join();
+            }
         }
     }
 }
