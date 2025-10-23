@@ -20,7 +20,7 @@ namespace YoloOnnxWinform.YoloOnnx
         protected readonly Scalar _paddingColor;
         protected float[] rentData;
         protected float[][] rentDataArr;
-        private int arrCount = 20;
+        private int arrCount = 30;
         private Thread _thread;
         private List<ImagePreprocessModel> _listImg = new List<ImagePreprocessModel>();
         private volatile bool _isStart = true;
