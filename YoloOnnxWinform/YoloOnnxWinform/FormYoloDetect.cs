@@ -78,11 +78,11 @@ namespace YoloOnnxWinform
 
         private void ProcessImage()
         {
-          
+
             this.progressBar1.Value = 0;
             Task.Run(() =>
             {
-                _viewPresenter.Process(_yoloPredictor);
+                _viewPresenter.Process(_yoloPredictor, ExcuteType.Parallel);
             });
         }
 
@@ -102,7 +102,7 @@ namespace YoloOnnxWinform
                     {
                         ((IYoloExt)_yoloPredictor).EndPreload();
                     }
-                   
+
                     MessageBox.Show("Image processing completed!");
                 }
             }));

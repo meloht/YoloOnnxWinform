@@ -21,7 +21,7 @@ namespace YoloOnnxWinform.YoloOnnx
         protected readonly Scalar _paddingColor;
         protected float[] rentData;
 
-        private int arrCount = 20;
+        private int arrCount = 30;
         private Thread _thread;
         private List<ImagePreprocessModel> _listImg = new List<ImagePreprocessModel>();
         private volatile bool _isStart = true;
@@ -206,14 +206,30 @@ namespace YoloOnnxWinform.YoloOnnx
                 item.Dispose();
             }
         }
-
+        private void GetChwArr(Mat paddedImg, float[] data)
+        {
+            int height = paddedImg.Height;
+            int width = paddedImg.Width;
+            int channels = paddedImg.Channels();
+            int index = 0;
+            for (int c = 0; c < channels; c++)          // 通道（R=0, G=1, B=2）
+            {
+                for (int h = 0; h < height; h++)  // 高度
+                {
+                    for (int w = 0; w < width; w++)  // 宽度
+                    {
+                        data[index++] = paddedImg.At<Vec3f>(h, w)[c];
+                    }
+                }
+            }
+        }
         protected unsafe void ConvertToCHW(Mat image, float[] data)
         {
             int height = image.Rows;
             int width = image.Cols;
             int channelSize = height * width;
 
-
+            
             // 使用指针直接访问，避免Split的开销
             unsafe
             {
@@ -253,7 +269,7 @@ namespace YoloOnnxWinform.YoloOnnx
             //var channels = paddedImg.Split();
 
             float[] data = rentData;
-            ConvertToCHW(paddedImg, data);
+            GetChwArr(paddedImg, data);
             //OptimizedGetAllChannelData(channels, data);
             paddedImg.Dispose();
             // 添加批次维度 (1, 3, H, W)
@@ -270,7 +286,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
 
                 float[] data = ArrayPool<float>.Shared.Rent(_len);
-                ConvertToCHW(paddedImg, data);
+                GetChwArr(paddedImg, data);
 
                 // 添加批次维度 (1, 3, H, W)
                 return new ImagePreprocessModel(inputImage.Height, inputImage.Width, model, data, top, left);

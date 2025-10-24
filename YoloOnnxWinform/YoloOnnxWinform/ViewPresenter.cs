@@ -74,13 +74,22 @@ namespace YoloOnnxWinform
 
         }
 
-        public void Process(IYoloModel yoloPredictor)
+        public void Process(IYoloModel yoloPredictor, ExcuteType excuteType)
         {
-            if (yoloPredictor is IYoloExt)
+            if (yoloPredictor is IYoloExt && ExcuteType.Parallel == excuteType)
             {
+
                 ProcessParallel(yoloPredictor);
-                return;
             }
+            else
+            {
+                ProcessSequence(yoloPredictor);
+            }
+           
+        }
+
+        private void ProcessSequence(IYoloModel yoloPredictor)
+        {
             int idx = 0;
             int total = _bindingSource.Count;
 
@@ -118,7 +127,7 @@ namespace YoloOnnxWinform
             int idx = 0;
             int total = _bindingSource.Count;
 
-            for (; idx < total; )
+            for (; idx < total;)
             {
                 var list = yolo.GetPreLoadImages();
                 foreach (var item1 in list)
@@ -131,7 +140,7 @@ namespace YoloOnnxWinform
                         _stopwatch.Stop();
                         item1.model.ExecuteTime = $"{_stopwatch.Elapsed.TotalMilliseconds}ms";
                         _stopwatch.Reset();
-                      
+
                     }
                     catch (Exception ex)
                     {
@@ -142,7 +151,7 @@ namespace YoloOnnxWinform
                 }
                 Thread.Sleep(50);
             }
-           
+
         }
 
 
