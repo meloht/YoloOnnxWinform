@@ -93,12 +93,12 @@ namespace YoloOnnxWinform
             {
                 this.progressBar1.Value = val;
                 this.lblProgress.Text = info;
-                this.lblTimeCost.Text = _stopwatch.Elapsed.ToString();
+                this.lblTimeCost.Text = _stopwatch.Elapsed.ToString(@"hh\:mm\:ss\.fff");
                 if (val == 100)
                 {
                     ProcessingButtonState(true);
                     _stopwatch.Stop();
-                    this.lblTimeCost.Text = _stopwatch.Elapsed.ToString();
+                    this.lblTimeCost.Text = _stopwatch.Elapsed.ToString(@"hh\:mm\:ss\.fff");
                     _stopwatch.Reset();
                     if (this._yoloPredictor is IYoloParallel)
                     {
