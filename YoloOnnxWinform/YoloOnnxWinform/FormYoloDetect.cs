@@ -80,6 +80,7 @@ namespace YoloOnnxWinform
         {
 
             this.progressBar1.Value = 0;
+            this.lblTimeCost.Text = "00:00:00.000";
             Task.Run(() =>
             {
                 _viewPresenter.Process(_yoloPredictor, ExcuteType.Parallel);
@@ -92,6 +93,7 @@ namespace YoloOnnxWinform
             {
                 this.progressBar1.Value = val;
                 this.lblProgress.Text = info;
+                this.lblTimeCost.Text = _stopwatch.Elapsed.ToString();
                 if (val == 100)
                 {
                     ProcessingButtonState(true);
