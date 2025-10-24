@@ -11,7 +11,7 @@ using YoloOnnxWinform.YoloOnnx;
 
 namespace YoloOnnxWinform.YoloWarpper
 {
-    public class YoloDetectImpl : YoloDetectImplBase, IYoloModel, IYoloExt
+    public class YoloDetectImpl : YoloDetectImplBase, IYoloModel, IYoloParallel
     {
         private YoloDetect yoloPredictor;
 

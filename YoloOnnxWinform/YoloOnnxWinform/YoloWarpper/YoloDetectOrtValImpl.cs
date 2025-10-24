@@ -10,7 +10,7 @@ using YoloOnnxWinform.YoloOnnx;
 
 namespace YoloOnnxWinform.YoloWarpper
 {
-    public class YoloDetectOrtValImpl : YoloDetectImplBase, IYoloModel, IYoloExt
+    public class YoloDetectOrtValImpl : YoloDetectImplBase, IYoloModel, IYoloParallel
     {
         private YoloDetectOrtVal yoloPredictor;
         public string DetectImage(string imgPath)

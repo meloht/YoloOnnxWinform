@@ -76,7 +76,7 @@ namespace YoloOnnxWinform
 
         public void Process(IYoloModel yoloPredictor, ExcuteType excuteType)
         {
-            if (yoloPredictor is IYoloExt && ExcuteType.Parallel == excuteType)
+            if (yoloPredictor is IYoloParallel && ExcuteType.Parallel == excuteType)
             {
 
                 ProcessParallel(yoloPredictor);
@@ -122,7 +122,7 @@ namespace YoloOnnxWinform
 
         private void ProcessParallel(IYoloModel yoloPredictor)
         {
-            IYoloExt yolo = (IYoloExt)yoloPredictor;
+            IYoloParallel yolo = (IYoloParallel)yoloPredictor;
             yolo.PreLoadImages(_bindingSource, _dictFile);
             int idx = 0;
             int total = _bindingSource.Count;

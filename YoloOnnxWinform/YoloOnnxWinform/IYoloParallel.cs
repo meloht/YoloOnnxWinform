@@ -7,7 +7,7 @@ using System.Text;
 
 namespace YoloOnnxWinform
 {
-    public interface IYoloExt
+    public interface IYoloParallel
     {
         void PreLoadImages(BindingList<DataModel> list, Dictionary<string, string> dict);
 
