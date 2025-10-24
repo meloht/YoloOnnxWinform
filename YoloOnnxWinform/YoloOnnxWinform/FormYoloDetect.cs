@@ -66,6 +66,9 @@ namespace YoloOnnxWinform
                 }
 
                 ProcessingButtonState(false);
+                this.lblTimeCost.Text = "00:00:00.000";
+                this.progressBar1.Value = 0;
+
                 _stopwatch.Start();
                 LoadImages(this.textboxDir.Text.Trim());
                 ProcessImage();
@@ -78,9 +81,6 @@ namespace YoloOnnxWinform
 
         private void ProcessImage()
         {
-
-            this.progressBar1.Value = 0;
-            this.lblTimeCost.Text = "00:00:00.000";
             Task.Run(() =>
             {
                 _viewPresenter.Process(_yoloPredictor, ExcuteType.Parallel);
