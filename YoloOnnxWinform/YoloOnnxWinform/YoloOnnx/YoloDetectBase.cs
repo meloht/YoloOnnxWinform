@@ -299,7 +299,7 @@ namespace YoloOnnxWinform.YoloOnnx
             SessionOptions session = new SessionOptions();
             session.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
             int gpuIdx = GetMainGPU();
-            if (gpuIdx == 0)
+            if (gpuIdx == -1)
             {
                 return session;
             }
@@ -335,7 +335,7 @@ namespace YoloOnnxWinform.YoloOnnx
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
-            return 0;
+            return -1;
         }
 
         private bool IsContain(string name, string[] set)
