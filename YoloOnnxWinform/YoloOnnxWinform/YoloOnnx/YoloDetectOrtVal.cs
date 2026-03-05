@@ -9,8 +9,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using static System.Windows.Forms.Design.AxImporter;
-
 
 
 
@@ -35,14 +33,13 @@ namespace YoloOnnxWinform.YoloOnnx
         private readonly long[] InputShape;
 
 
-        public YoloDetectOrtVal(string onnxModelPath, float confidenceThres, float iouThres)
+        public YoloDetectOrtVal(InferenceSession session, SessionOptions options, float confidenceThres, float iouThres)
         {
             _confidenceThres = confidenceThres;
             _iouThres = iouThres;
 
-            _options = BuildSessionOptions();
-
-            _session = new InferenceSession(onnxModelPath, _options);
+            _options = options;
+            _session = session;
             Labels = MapLabelsAndColors(_session);
             var inputMeta = _session.InputMetadata.First();
             InputName = _session.InputNames[0];
@@ -57,8 +54,6 @@ namespace YoloOnnxWinform.YoloOnnx
             _channels3 = _channels * 3;
             _channels4 = _channels * 4;
 
-            var _runOptions = new RunOptions();
-            var _ortIoBinding = _session.CreateIoBinding();
 
             _colorPalette = GenerateColorPalette(Labels.Length);
 

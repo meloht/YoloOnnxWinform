@@ -18,7 +18,6 @@ namespace YoloOnnxWinform.YoloOnnx
 {
     public class YoloDetect : YoloDetectBase, IYoloDetect
     {
-        public readonly string _onnxModelPath;
         private readonly float _confidenceThres;
         private readonly float _iouThres;
         private readonly LabelModel[] Labels;
@@ -27,15 +26,15 @@ namespace YoloOnnxWinform.YoloOnnx
         private SessionOptions _options;
         private bool disposedValue;
 
-        public YoloDetect(string onnxModelPath, float confidenceThres, float iouThres)
+        public YoloDetect(InferenceSession session, SessionOptions options, float confidenceThres, float iouThres)
         {
-            _onnxModelPath = onnxModelPath;
+
             _confidenceThres = confidenceThres;
             _iouThres = iouThres;
 
-            _options = BuildSessionOptions();
+            _options = options;
 
-            session = new InferenceSession(onnxModelPath, _options);
+            session = session;
             Labels = MapLabelsAndColors(session);
             _colorPalette = GenerateColorPalette(Labels.Length);
             var inputMeta = session.InputMetadata.First().Value;

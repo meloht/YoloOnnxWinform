@@ -9,7 +9,7 @@ using System.Management;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using static System.Windows.Forms.Design.AxImporter;
+
 
 namespace YoloOnnxWinform.YoloOnnx
 {
@@ -28,6 +28,7 @@ namespace YoloOnnxWinform.YoloOnnx
         protected BindingList<DataModel> _listName = new BindingList<DataModel>();
         protected Dictionary<string, string> _dict = new Dictionary<string, string>();
         private int _len = 0;
+
         int _idx = 0;
         public YoloDetectBase()
         {
@@ -98,12 +99,10 @@ namespace YoloOnnxWinform.YoloOnnx
         public void DrawDetections(Mat img, Rect box, float score, int classId, string className)
         {
             var color = _colorPalette[classId];
-            var topLeft = new OpenCvSharp.Point(box.X, box.Y);
-            var bottomRight = new OpenCvSharp.Point(box.X + box.Width, box.Y + box.Height);
 
             double fontScale = 1.0;
             // 绘制边界框
-            Cv2.Rectangle(img, topLeft, bottomRight, color, 2);
+            Cv2.Rectangle(img, box, color, 2);
 
             int height = img.Height;
             int width = img.Width;
@@ -276,6 +275,8 @@ namespace YoloOnnxWinform.YoloOnnx
             return (data, top, left);
         }
 
+
+
         protected ImagePreprocessModel PreprocessBatch(Mat inputImage, DataModel model)
         {
             // Letterbox处理
@@ -294,62 +295,7 @@ namespace YoloOnnxWinform.YoloOnnx
 
         }
 
-        protected SessionOptions BuildSessionOptions()
-        {
-            SessionOptions session = new SessionOptions();
-            session.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
-            int gpuIdx = GetMainGPU();
-            if (gpuIdx == -1)
-            {
-                return session;
-            }
 
-            session.AppendExecutionProvider_DML(gpuIdx);
-            return session;
-
-        }
-        private int GetMainGPU()
-        {
-            try
-            {
-                ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_VideoController");
-                int idx = 0;
-                string[] set = ["NVIDIA", "GEFORCE", "AMD", "RADEON"];
-                foreach (ManagementObject mo in searcher.Get())
-                {
-                    string name = mo["Name"]?.ToString() ?? "";
-                    if (IsContain(name, set))
-                    {
-                        return idx;
-                    }
-
-                    string description = mo["Description"]?.ToString() ?? "";
-                    if (IsContain(description, set))
-                    {
-                        return idx;
-                    }
-                    idx++;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex.Message);
-            }
-            return -1;
-        }
-
-        private bool IsContain(string name, string[] set)
-        {
-            if (name != null)
-            {
-                foreach (var item in set)
-                {
-                    if (name.Contains(item))
-                        return true;
-                }
-            }
-            return false;
-        }
         private bool ImageListIsEmpty()
         {
             lock (_listImg)

@@ -7,13 +7,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YoloOnnx;
 using YoloOnnxWinform.YoloOnnx;
 
 namespace YoloOnnxWinform.YoloWarpper
 {
     public class YoloDetectImpl : YoloDetectImplBase, IYoloModel, IYoloParallel
     {
-        private YoloDetect yoloPredictor;
+        private IYoloDetect yoloPredictor;
 
         public string DetectImage(string imgPath)
         {
@@ -33,7 +34,7 @@ namespace YoloOnnxWinform.YoloWarpper
 
         public void LoadModel(string modelPath, float confidence, float iou)
         {
-            yoloPredictor = new YoloDetect(modelPath, confidence, iou);
+            yoloPredictor = YoloDetectFactory.CreateYoloDetect(modelPath, confidence, iou, YoloWarpperType.YoloDetect);
         }
 
 
