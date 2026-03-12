@@ -19,7 +19,8 @@ namespace YoloOnnxWinform.YoloOnnx
         protected int InputWidth;
         protected int InputHeight;
         protected readonly Scalar _paddingColor;
-        protected float[] rentData;
+       
+        protected float[] _inputBuffer;
 
         private int arrCount = 30;
         private Thread _thread;
@@ -56,7 +57,7 @@ namespace YoloOnnxWinform.YoloOnnx
             {
                 _len *= item;
             }
-            rentData = new float[_len];
+            _inputBuffer = new float[_len];
            
 
         }
@@ -267,7 +268,7 @@ namespace YoloOnnxWinform.YoloOnnx
             //// 转换为CHW格式 (3, H, W)
             //var channels = paddedImg.Split();
 
-            float[] data = rentData;
+            float[] data = _inputBuffer;
             GetChwArr(paddedImg, data);
             //OptimizedGetAllChannelData(channels, data);
             paddedImg.Dispose();

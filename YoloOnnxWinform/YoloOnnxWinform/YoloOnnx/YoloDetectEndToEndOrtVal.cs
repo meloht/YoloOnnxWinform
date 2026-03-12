@@ -94,7 +94,7 @@ namespace YoloOnnx
         public List<Detection> Run(Mat inputImage)
         {
             // 1. Preprocessing (Letterbox)
-            float[] data = rentData;
+            float[] data = _inputBuffer;
             float ratio = Math.Min((float)InputWidth / inputImage.Width, (float)InputHeight / inputImage.Height);
 
             Preprocess(inputImage, ratio, data);
