@@ -19,7 +19,7 @@ namespace YoloOnnxWinform.YoloOnnx
         public string Name { get; init; } = default!;
     }
 
-    public record Output(int BatchSize, int Elements, int Channels, int Width, int Height)
+    public record Output(int BatchSize, int Elements, int BoxNums, int Width, int Height)
     {
         public static Output Classification(int[] dimensions)
             => new(dimensions[0], dimensions[1], 0, 0, 0);

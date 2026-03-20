@@ -24,10 +24,10 @@ namespace YoloOnnxWinform.YoloOnnx
         private InferenceSession _session;
         private SessionOptions _options;
 
-        private readonly int _channels;
-        private readonly int _channels2;
-        private readonly int _channels3;
-        private readonly int _channels4;
+        private readonly int _boxNums;
+        private readonly int _boxNums2;
+        private readonly int _boxNums3;
+        private readonly int _boxNums4;
         private readonly List<Output> _outputs;
         private readonly Input _input;
         private readonly long[] InputShape;
@@ -51,10 +51,10 @@ namespace YoloOnnxWinform.YoloOnnx
 
             _outputs = GetOutputShapes();
             _input = GetModelInputShape();
-            _channels = _outputs[0].Channels;
-            _channels2 = _channels * 2;
-            _channels3 = _channels * 3;
-            _channels4 = _channels * 4;
+            _boxNums = _outputs[0].BoxNums;
+            _boxNums2 = _boxNums * 2;
+            _boxNums3 = _boxNums * 3;
+            _boxNums4 = _boxNums * 4;
 
 
             _colorPalette = GenerateColorPalette(Labels.Length);
@@ -100,16 +100,16 @@ namespace YoloOnnxWinform.YoloOnnx
             _class_ids.Clear();
 
             float gain = Math.Min((float)InputHeight / imageHeight, (float)InputWidth / imageWidth);
-            for (int i = 0; i < _channels; i++)
+            for (int i = 0; i < _boxNums; i++)
             {
                 // Move forward to confidence value of first label
-                var labelOffset = i + _channels4;
+                var labelOffset = i + _boxNums4;
 
                 float bestConfidence = 0f;
                 int bestLabelIndex = -1;
 
                 // Get confidence and label for current bounding box
-                for (var l = 0; l < Labels.Length; l++, labelOffset += _channels)
+                for (var l = 0; l < Labels.Length; l++, labelOffset += _boxNums)
                 {
                     var boxConfidence = ortSpan[labelOffset];
 
@@ -125,9 +125,9 @@ namespace YoloOnnxWinform.YoloOnnx
                     continue;
 
                 float x = ortSpan[i] - padLeft;
-                float y = ortSpan[i + _channels] - padTop;
-                float w = ortSpan[i + _channels2];
-                float h = ortSpan[i + _channels3];
+                float y = ortSpan[i + _boxNums] - padTop;
+                float w = ortSpan[i + _boxNums2];
+                float h = ortSpan[i + _boxNums3];
 
                 // Calculate the scaled coordinates of the bounding box
                 int left = (int)((x - w / 2) / gain);

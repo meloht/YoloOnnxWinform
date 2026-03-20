@@ -35,10 +35,10 @@ namespace YoloOnnx
         private readonly OrtSafeMemoryHandle _inputNativeAllocation;
         private readonly OrtSafeMemoryHandle _outputNativeAllocation;
 
-        private readonly int _channels;
-        private readonly int _channels2;
-        private readonly int _channels3;
-        private readonly int _channels4;
+        private readonly int _boxNums;
+        private readonly int _boxNums2;
+        private readonly int _boxNums3;
+        private readonly int _boxNums4;
 
 
 
@@ -67,10 +67,10 @@ namespace YoloOnnx
             _outputShape = Array.ConvertAll<int, long>(outputMetaData[_outputName].Dimensions, Convert.ToInt64);
 
 
-            _channels = outputMetaData[_outputName].Dimensions[2];
-            _channels2 = _channels * 2;
-            _channels3 = _channels * 3;
-            _channels4 = _channels * 4;
+            _boxNums = outputMetaData[_outputName].Dimensions[2];
+            _boxNums2 = _boxNums * 2;
+            _boxNums3 = _boxNums * 3;
+            _boxNums4 = _boxNums * 4;
 
             _colorPalette = GenerateColorPalette(Labels.Length);
 
@@ -215,16 +215,16 @@ namespace YoloOnnx
             List<float> scores = new List<float>();
             List<int> class_ids = new List<int>();
             float gain = Math.Min((float)InputHeight / imageHeight, (float)InputWidth / imageWidth);
-            for (int i = 0; i < _channels; i++)
+            for (int i = 0; i < _boxNums; i++)
             {
                 // Move forward to confidence value of first label
-                var labelOffset = i + _channels4;
+                var labelOffset = i + _boxNums4;
 
                 float bestConfidence = 0f;
                 int bestLabelIndex = -1;
 
                 // Get confidence and label for current bounding box
-                for (var l = 0; l < Labels.Length; l++, labelOffset += _channels)
+                for (var l = 0; l < Labels.Length; l++, labelOffset += _boxNums)
                 {
                     var boxConfidence = ortSpan[labelOffset];
 
@@ -240,9 +240,9 @@ namespace YoloOnnx
                     continue;
 
                 float x = ortSpan[i] - padLeft;
-                float y = ortSpan[i + _channels] - padTop;
-                float w = ortSpan[i + _channels2];
-                float h = ortSpan[i + _channels3];
+                float y = ortSpan[i + _boxNums] - padTop;
+                float w = ortSpan[i + _boxNums2];
+                float h = ortSpan[i + _boxNums3];
 
                 // Calculate the scaled coordinates of the bounding box
                 int left = (int)((x - w / 2) / gain);
