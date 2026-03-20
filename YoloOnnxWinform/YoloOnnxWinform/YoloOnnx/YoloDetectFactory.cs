@@ -34,6 +34,10 @@ namespace YoloOnnx
                 {
                     return new YoloDetect(session, options, confidence, iou);
                 }
+                else if (yoloWarpperType == YoloWarpperType.YoloDetectOrtIoBind)
+                {
+                    return new YoloDetectOrtIoBinding(session, options, confidence, iou);
+                }
                 return new YoloDetectOrtVal(session, options, confidence, iou);
             }
         }

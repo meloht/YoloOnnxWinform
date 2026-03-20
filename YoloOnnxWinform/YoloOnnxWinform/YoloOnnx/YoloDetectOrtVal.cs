@@ -31,7 +31,7 @@ namespace YoloOnnxWinform.YoloOnnx
         private readonly List<Output> _outputs;
         private readonly Input _input;
         private readonly long[] InputShape;
-
+    
 
         public YoloDetectOrtVal(InferenceSession session, SessionOptions options, float confidenceThres, float iouThres)
         {
@@ -180,7 +180,7 @@ namespace YoloOnnxWinform.YoloOnnx
         {
             // 预处理图像
             var imgData = Preprocess(inputImage);
-
+           
             using var inputOrtValue = OrtValue.CreateTensorValueFromMemory(imgData.OutData, InputShape);
 
             using var runOptions = new RunOptions();

@@ -28,7 +28,7 @@ namespace YoloOnnxWinform.YoloOnnx
         private volatile bool _isStart = true;
         protected BindingList<DataModel> _listName = new BindingList<DataModel>();
         protected Dictionary<string, string> _dict = new Dictionary<string, string>();
-        private int _len = 0;
+        protected int _len = 0;
 
         int _idx = 0;
         public YoloDetectBase()
