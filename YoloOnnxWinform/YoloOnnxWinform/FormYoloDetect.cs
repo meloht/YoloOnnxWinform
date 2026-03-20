@@ -83,7 +83,7 @@ namespace YoloOnnxWinform
         {
             Task.Run(() =>
             {
-                _viewPresenter.Process(_yoloPredictor, ExcuteType.Parallel);
+                _viewPresenter.Process(_yoloPredictor, ExcuteType.Sequence);
             });
         }
 
