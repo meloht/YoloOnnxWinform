@@ -46,6 +46,7 @@ namespace YoloOnnx
         {
             SessionOptions session = new SessionOptions();
             session.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+            session.EnableCpuMemArena=true;
             int gpuIdx = GetMainGPU();
             if (gpuIdx == -1)
             {

@@ -192,7 +192,7 @@ namespace YoloOnnxWinform.YoloOnnx
             var inputDims = inputMeta.Dimensions;
 
             // 预处理图像
-            var imgData = Preprocess(inputImage);
+            var imgData = Preprocess(inputImage, _inputBuffer);
             string inputName = session.InputNames[0];
             // 准备输入
             var inputTensor = new DenseTensor<float>(imgData.OutData, inputDims);

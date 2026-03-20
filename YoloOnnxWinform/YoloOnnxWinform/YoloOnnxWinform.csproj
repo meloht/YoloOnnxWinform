@@ -14,6 +14,8 @@
     <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.3" />
     <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
     <PackageReference Include="System.Management" Version="9.0.10" />
+    <PackageReference Include="YoloDotNet" Version="4.2.0" />
+    <PackageReference Include="YoloDotNet.ExecutionProvider.DirectML" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

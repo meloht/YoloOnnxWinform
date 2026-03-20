@@ -1,105 +1,117 @@
 ﻿
-//using SkiaSharp;
-//using System;
-//using System.Collections.Generic;
-//using System.Diagnostics;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-//using YoloDotNet;
-//using YoloDotNet.Core;
-//using YoloDotNet.Enums;
-//using YoloDotNet.Extensions;
-//using YoloDotNet.Models;
+using SkiaSharp;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using YoloDotNet;
+using YoloDotNet.Core;
+using YoloDotNet.Enums;
+using YoloDotNet.ExecutionProvider.DirectML;
+using YoloDotNet.Extensions;
+using YoloDotNet.Models;
 
-//namespace YoloOnnxWinform.YoloWarpper
-//{
+namespace YoloOnnxWinform.YoloWarpper
+{
 
-//    public class YoloDotNetImpl : IYoloModel
-//    {
-//        private Yolo yoloPredictor;
-//        private DetectionDrawingOptions _drawingOptions;
-//        private float _confidence;
-//        private float _iou;
-//        public string DetectImage(string imgPath)
-//        {
-//            using var image = SKBitmap.Decode(imgPath);
-//            var data = yoloPredictor.RunObjectDetection(image, confidence: _confidence, iou: this._iou);
+    public class YoloDotNetImpl : IYoloModel
+    {
+        private Yolo yoloPredictor;
+        private DetectionDrawingOptions _drawingOptions;
+        private float _confidence;
+        private float _iou;
+        public string DetectImage(string imgPath)
+        {
+            using var image = SKBitmap.Decode(imgPath);
+            var data = yoloPredictor.RunObjectDetection(image, confidence: _confidence, iou: this._iou);
 
-//            return GetResult(data);
-//        }
+            return GetResult(data);
+        }
 
-//        private string GetResult(List<ObjectDetection> list)
-//        {
-//            if (list == null || list.Count == 0)
-//                return string.Empty;
+        private string GetResult(List<ObjectDetection> list)
+        {
+            if (list == null || list.Count == 0)
+                return string.Empty;
 
-//            var dict = list.GroupBy(p => p.Label.Name).Select(p => $"{p.Count()} {p.Key}").ToList();
-//            string confs = string.Join(", ", list.Select(p => Math.Round(p.Confidence, 2)));
-//            return $"{string.Join(", ", dict)} [{confs}]";
-//        }
+            var dict = list.GroupBy(p => p.Label.Name).Select(p => $"{p.Count()} {p.Key}").ToList();
+            string confs = string.Join(", ", list.Select(p => Math.Round(p.Confidence, 2)));
+            return $"{string.Join(", ", dict)} [{confs}]";
+        }
 
-//        public void Dispose()
-//        {
-//            yoloPredictor?.Dispose();
-//        }
+        public void Dispose()
+        {
+            yoloPredictor?.Dispose();
+        }
 
-//        public void LoadModel(string modelPath, float confidence, float iou)
-//        {
-//            _drawingOptions = new DetectionDrawingOptions
-//            {
-//                DrawBoundingBoxes = true,
-//                DrawConfidenceScore = true,
-//                DrawLabels = true,
-//                EnableFontShadow = true,
+        public void LoadModel(string modelPath, float confidence, float iou)
+        {
+            _drawingOptions = new DetectionDrawingOptions
+            {
+                DrawBoundingBoxes = true,
+                DrawConfidenceScore = true,
+                DrawLabels = true,
+                EnableFontShadow = true,
 
-//                Font = SKTypeface.Default,
+                Font = SKTypeface.Default,
 
-//                FontSize = 18,
-//                FontColor = SKColors.Blue,
-//                DrawLabelBackground = true,
-//                EnableDynamicScaling = true,
-//                BorderThickness = 2,
+                FontSize = 18,
+                FontColor = SKColors.Blue,
+                DrawLabelBackground = true,
+                EnableDynamicScaling = true,
+                BorderThickness = 2,
 
-//                BoundingBoxOpacity = 64,
+                BoundingBoxOpacity = 64,
 
-//            };
-//            this._confidence = confidence;
-//            this._iou = iou;
-//            yoloPredictor = new Yolo(new YoloOptions
-//            {
-//                OnnxModel = modelPath,
-//                ExecutionProvider = new CpuExecutionProvider(),
-//                ImageResize = ImageResize.Proportional,
-//                SamplingOptions = new(SKFilterMode.Linear, SKMipmapMode.None) // YoloDotNet default
-//            });
-//        }
+            };
+            this._confidence = confidence;
+            this._iou = iou;
+            yoloPredictor = new Yolo(new YoloOptions
+            {
+                ExecutionProvider = new DirectMLExecutionProvider(
 
-//        public string SaveImage(FileRowItem item)
-//        {
-//            using var image = SKBitmap.Decode(item.FilePath);
+                    // Path or byte[] to the ONNX model file.
+                    model: modelPath,
 
-//            // Run object detection inference
-//            var results = yoloPredictor.RunObjectDetection(image, confidence: _confidence, iou: this._iou);
+                    // GPU device Id to use for inference. -1 = CPU, 0+ = GPU device Id.
+                    gpuId: 1
 
-//            // Draw results
-//            image.Draw(results, _drawingOptions);
+                    // Optional configuration for TensorRT execution.
+                    // Executes inference using NVIDIA TensorRT for highly optimized GPU acceleration.
+                    // Supports FP32 and FP16 precision modes, and optionally INT8 if calibration data is provided.
+                    // trtConfig: new TensorRt {  ... }
+                    ),
+                ImageResize = ImageResize.Proportional,
+                SamplingOptions = new(SKFilterMode.Linear, SKMipmapMode.None) // YoloDotNet default
+            });
+        }
 
-//            string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
-//            if (!Directory.Exists(folder))
-//            {
-//                Directory.CreateDirectory(folder);
-//            }
-//            string path = Path.Combine(folder, item.FileName);
-//            if (File.Exists(path))
-//            {
-//                File.Delete(path);
-//            }
+        public string SaveImage(FileRowItem item)
+        {
+            using var image = SKBitmap.Decode(item.FilePath);
 
-//            // Save image
-//            image.Save(path, SKEncodedImageFormat.Jpeg, 100);
-//            return path;
-//        }
-//    }
+            // Run object detection inference
+            var results = yoloPredictor.RunObjectDetection(image, confidence: _confidence, iou: this._iou);
 
-//}
+            // Draw results
+            image.Draw(results, _drawingOptions);
+
+            string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+            string path = Path.Combine(folder, item.FileName);
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+
+            // Save image
+            image.Save(path, SKEncodedImageFormat.Jpeg, 100);
+            return path;
+        }
+    }
+
+}

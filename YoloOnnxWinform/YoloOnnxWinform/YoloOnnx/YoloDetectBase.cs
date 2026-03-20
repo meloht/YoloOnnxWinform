@@ -9,6 +9,7 @@ using System.Management;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using YoloOnnx;
 
 
 namespace YoloOnnxWinform.YoloOnnx
@@ -19,7 +20,7 @@ namespace YoloOnnxWinform.YoloOnnx
         protected int InputWidth;
         protected int InputHeight;
         protected readonly Scalar _paddingColor;
-       
+
         protected float[] _inputBuffer;
 
         private int arrCount = 30;
@@ -58,7 +59,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 _len *= item;
             }
             _inputBuffer = new float[_len];
-           
+
 
         }
         protected LabelModel[] MapLabelsAndColors(InferenceSession session)
@@ -131,7 +132,7 @@ namespace YoloOnnxWinform.YoloOnnx
             // 标签文本
             Cv2.PutText(img, label, labelTop, HersheyFonts.HersheySimplex, fontScale, Scalar.White, fontThick, LineTypes.AntiAlias);
         }
-        protected (Mat letterboxImg, int topPad, int leftPad) LetterboxFor1280(Mat inputImage)
+        protected PreImageData LetterboxFor1280(Mat inputImage)
         {
             // BGR转RGB
             using Mat rgbImg = new Mat();
@@ -176,10 +177,10 @@ namespace YoloOnnxWinform.YoloOnnx
             // 关键检查：确保填充后尺寸严格为 1280×1280
             if (letterboxImg.Rows != InputHeight || letterboxImg.Cols != InputWidth)
             {
-                throw new Exception($"Letterbox 后尺寸错误！预期 (1280,1280)，实际 ({letterboxImg.Rows},{letterboxImg.Cols})");
+                throw new Exception($"Letterbox size error! expected (1280,1280)，actual ({letterboxImg.Rows},{letterboxImg.Cols})");
             }
 
-            return (letterboxImg, padH, padW);
+            return new PreImageData(letterboxImg, padH, padW);
         }
 
         protected void OptimizedGetAllChannelData(Mat[] channels, float[] data)
@@ -218,7 +219,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 {
                     for (int w = 0; w < width; w++)  // 宽度
                     {
-                        data[index++] = paddedImg.At<Vec3f>(h, w)[c];
+                        data[index++] = (float)paddedImg.At<Vec3b>(h, w)[c] / 255.0f;
                     }
                 }
             }
@@ -229,7 +230,7 @@ namespace YoloOnnxWinform.YoloOnnx
             int width = image.Cols;
             int channelSize = height * width;
 
-            
+
             // 使用指针直接访问，避免Split的开销
             unsafe
             {
@@ -256,24 +257,23 @@ namespace YoloOnnxWinform.YoloOnnx
         }
 
 
-        protected (float[] OutData, int TopPad, int LeftPad) Preprocess(Mat inputImage)
+        protected PreResult Preprocess(Mat inputImage, float[] data)
         {
 
             // Letterbox处理
-            (Mat paddedImg, int top, int left) = LetterboxFor1280(inputImage);
+            var res = LetterboxFor1280(inputImage);
 
             // 归一化并转换为float数组
-            paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
+            //paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
 
             //// 转换为CHW格式 (3, H, W)
             //var channels = paddedImg.Split();
 
-            float[] data = _inputBuffer;
-            GetChwArr(paddedImg, data);
+            GetChwArr(res.LetterboxImg, data);
             //OptimizedGetAllChannelData(channels, data);
-            paddedImg.Dispose();
+            res.LetterboxImg.Dispose();
             // 添加批次维度 (1, 3, H, W)
-            return (data, top, left);
+            return new PreResult(data, res.TopPad, res.LeftPad);
         }
 
 
@@ -281,17 +281,17 @@ namespace YoloOnnxWinform.YoloOnnx
         protected ImagePreprocessModel PreprocessBatch(Mat inputImage, DataModel model)
         {
             // Letterbox处理
-            (Mat paddedImg, int top, int left) = LetterboxFor1280(inputImage);
-            using (paddedImg)
+            var res = LetterboxFor1280(inputImage);
+            using (res.LetterboxImg)
             {
                 // 归一化并转换为float数组
-                paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
+                // paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
 
                 float[] data = ArrayPool<float>.Shared.Rent(_len);
-                GetChwArr(paddedImg, data);
+                GetChwArr(res.LetterboxImg, data);
 
                 // 添加批次维度 (1, 3, H, W)
-                return new ImagePreprocessModel(inputImage.Height, inputImage.Width, model, data, top, left);
+                return new ImagePreprocessModel(inputImage.Height, inputImage.Width, model, data, res.TopPad, res.LeftPad);
             }
 
         }

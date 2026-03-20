@@ -126,7 +126,7 @@ namespace YoloOnnx
         {
             ClearOutput();
             ClearInput();
-            var imgData = Preprocess(inputImage);
+            var imgData = Preprocess(inputImage, _inputBuffer);
             PopulateNativeBuffer<float>(_inputNativeAllocation.Handle, imgData.OutData);
 
 
