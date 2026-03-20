@@ -31,7 +31,9 @@ namespace YoloOnnxWinform.YoloOnnx
         private readonly List<Output> _outputs;
         private readonly Input _input;
         private readonly long[] InputShape;
-
+        private List<Rect> _boxes = new List<Rect>();
+        private List<float> _scores = new List<float>();
+        private List<int> _class_ids = new List<int>();
 
         public YoloDetectOrtVal(InferenceSession session, SessionOptions options, float confidenceThres, float iouThres)
         {
@@ -93,9 +95,10 @@ namespace YoloOnnxWinform.YoloOnnx
 
         private List<Detection> Postprocess(int imageHeight, int imageWidth, ReadOnlySpan<float> ortSpan, int padTop, int padLeft)
         {
-            List<Rect> boxes = new List<Rect>();
-            List<float> scores = new List<float>();
-            List<int> class_ids = new List<int>();
+            _boxes.Clear();
+            _scores.Clear();
+            _class_ids.Clear();
+
             float gain = Math.Min((float)InputHeight / imageHeight, (float)InputWidth / imageWidth);
             for (int i = 0; i < _channels; i++)
             {
@@ -141,25 +144,25 @@ namespace YoloOnnxWinform.YoloOnnx
                 // Add the class ID, score, and box coordinates to the respective lists
                 if (width > 0 && height > 0)
                 {
-                    class_ids.Add(bestLabelIndex);
-                    scores.Add(bestConfidence);
-                    boxes.Add(new Rect(left, top, width, height));
+                    _class_ids.Add(bestLabelIndex);
+                    _scores.Add(bestConfidence);
+                    _boxes.Add(new Rect(left, top, width, height));
                 }
             }
 
             // 非极大值抑制
             int[] indices = [];
-            if (boxes.Count > 0)
+            if (_boxes.Count > 0)
             {
-                CvDnn.NMSBoxes(boxes, scores, _confidenceThres, _iouThres, out indices);
+                CvDnn.NMSBoxes(_boxes, _scores, _confidenceThres, _iouThres, out indices);
             }
             List<Detection> results = new List<Detection>();
             // 绘制检测结果
             foreach (var idx in indices)
             {
-                Rect box = boxes[idx];
-                float score = scores[idx];
-                int class_id = class_ids[idx];
+                Rect box = _boxes[idx];
+                float score = _scores[idx];
+                int class_id = _class_ids[idx];
                 string lable = Labels[class_id].Name;
 
                 Detection detection = new Detection();
