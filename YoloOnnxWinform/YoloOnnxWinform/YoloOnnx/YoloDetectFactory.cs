@@ -5,7 +5,6 @@ using System.Management;
 using System.Text;
 using YoloOnnxWinform;
 using YoloOnnxWinform.YoloOnnx;
-using static System.Windows.Forms.Design.AxImporter;
 
 namespace YoloOnnx
 {

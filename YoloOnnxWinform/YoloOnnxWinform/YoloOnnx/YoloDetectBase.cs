@@ -35,8 +35,6 @@ namespace YoloOnnxWinform.YoloOnnx
         public YoloDetectBase()
         {
             _paddingColor = new Scalar(114, 114, 114);
-
-
         }
 
         protected void Start()

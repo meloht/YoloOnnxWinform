@@ -31,7 +31,7 @@ namespace YoloOnnxWinform.YoloWarpper
 
         public void LoadModel(string modelPath, float confidence, float iou)
         {
-            yoloPredictor = YoloDetectFactory.CreateYoloDetect(modelPath, confidence, iou,YoloWarpperType.YoloDetectOrt);
+            yoloPredictor = YoloDetectFactory.CreateYoloDetect(modelPath, confidence, iou, YoloWarpperType.YoloDetectOrt);
         }
 
         public void PreLoadImages(BindingList<DataModel> list, Dictionary<string, string> dict)
