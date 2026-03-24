@@ -33,7 +33,7 @@ namespace YoloOnnxWinform.YoloOnnx
         private readonly long[] InputShape;
         private List<Rect> _boxes = new List<Rect>();
         private List<float> _scores = new List<float>();
-        private List<int> _class_ids = new List<int>();
+        private List<int> _classIds = new List<int>();
 
         public YoloDetectOrtVal(InferenceSession session, SessionOptions options, float confidenceThres, float iouThres)
         {
@@ -93,13 +93,13 @@ namespace YoloOnnxWinform.YoloOnnx
             return Input.Shape(dimensions);
         }
 
-        private List<Detection> Postprocess(int imageHeight, int imageWidth, ReadOnlySpan<float> ortSpan, int padTop, int padLeft)
+        private List<Detection> Postprocess(int imageHeight, int imageWidth, ReadOnlySpan<float> ortSpan, int padTop, int padLeft, float scale)
         {
             _boxes.Clear();
             _scores.Clear();
-            _class_ids.Clear();
+            _classIds.Clear();
 
-            float gain = Math.Min((float)InputHeight / imageHeight, (float)InputWidth / imageWidth);
+
             for (int i = 0; i < _boxNums; i++)
             {
                 // Move forward to confidence value of first label
@@ -130,10 +130,10 @@ namespace YoloOnnxWinform.YoloOnnx
                 float h = ortSpan[i + _boxNums3];
 
                 // Calculate the scaled coordinates of the bounding box
-                int left = (int)((x - w / 2) / gain);
-                int top = (int)((y - h / 2) / gain);
-                int width = (int)(w / gain);
-                int height = (int)(h / gain);
+                int left = (int)((x - w / 2) / scale);
+                int top = (int)((y - h / 2) / scale);
+                int width = (int)(w / scale);
+                int height = (int)(h / scale);
 
                 // Ensure coordinates are within image bounds
                 left = Math.Max(0, left);
@@ -144,7 +144,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 // Add the class ID, score, and box coordinates to the respective lists
                 if (width > 0 && height > 0)
                 {
-                    _class_ids.Add(bestLabelIndex);
+                    _classIds.Add(bestLabelIndex);
                     _scores.Add(bestConfidence);
                     _boxes.Add(new Rect(left, top, width, height));
                 }
@@ -162,7 +162,7 @@ namespace YoloOnnxWinform.YoloOnnx
             {
                 Rect box = _boxes[idx];
                 float score = _scores[idx];
-                int class_id = _class_ids[idx];
+                int class_id = _classIds[idx];
                 string lable = Labels[class_id].Name;
 
                 Detection detection = new Detection();
@@ -192,9 +192,7 @@ namespace YoloOnnxWinform.YoloOnnx
             using var output0 = outputs[0];
 
             // 后处理
-            var result = Postprocess(inputImage.Height, inputImage.Width, output0.GetTensorDataAsSpan<float>(), imgData.TopPad, imgData.LeftPad);
-
-
+            var result = Postprocess(inputImage.Height, inputImage.Width, output0.GetTensorDataAsSpan<float>(), imgData.TopPad, imgData.LeftPad, imgData.Scale);
             return result;
         }
 
@@ -220,9 +218,8 @@ namespace YoloOnnxWinform.YoloOnnx
 
         public void Postprocess(ReadOnlySpan<float> ortTensor, ImagePreprocessModel imageData)
         {
-            var list = Postprocess(imageData.imageHeight, imageData.imageWidth, ortTensor, imageData.TopPad, imageData.LeftPad);
+            var list = Postprocess(imageData.imageHeight, imageData.imageWidth, ortTensor, imageData.PadY, imageData.PadX,imageData.Scale);
             imageData.model.DetectionResult = Utils.GetResult(list);
-
         }
 
         public void PreLoadImages(BindingList<DataModel> list, Dictionary<string, string> dict)

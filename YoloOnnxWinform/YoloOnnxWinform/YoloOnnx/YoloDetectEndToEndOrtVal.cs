@@ -81,9 +81,11 @@ namespace YoloOnnx
             // 1. Preprocessing (Letterbox)
             int newWidth = (int)(image.Width * ratio);
             int newHeight = (int)(image.Height * ratio);
+            using Mat rgbImg = new Mat();
 
+            Cv2.CvtColor(image, rgbImg, ColorConversionCodes.BGR2RGB);
             using var resized = new Mat();
-            Cv2.Resize(image, resized, new OpenCvSharp.Size(newWidth, newHeight));
+            Cv2.Resize(rgbImg, resized, new OpenCvSharp.Size(newWidth, newHeight));
 
             using var canvas = new Mat(new OpenCvSharp.Size(InputWidth, InputHeight), MatType.CV_8UC3, new Scalar(114, 114, 114));
             resized.CopyTo(new Mat(canvas, new Rect(0, 0, newWidth, newHeight)));
@@ -95,9 +97,8 @@ namespace YoloOnnx
         {
             // 1. Preprocessing (Letterbox)
             float[] data = _inputBuffer;
-            float ratio = Math.Min((float)InputWidth / inputImage.Width, (float)InputHeight / inputImage.Height);
-
-            Preprocess(inputImage, ratio, data);
+           
+            var preRes = Preprocess(inputImage, data);
             // 3. 推理
             using var inputOrtValue = OrtValue.CreateTensorValueFromMemory(data, InputShape);
             using var runOptions = new RunOptions();
@@ -106,7 +107,7 @@ namespace YoloOnnx
             using var output0 = results[0];
 
             // 4. 后处理 (YOLO26 直接输出 [1, 300, 6])
-            return PostProcess(output0, _confidenceThres, ratio);
+            return PostProcess(output0, _confidenceThres, preRes.Scale, preRes.LeftPad, preRes.TopPad);
         }
 
         public void Run(ImagePreprocessModel model)
@@ -123,30 +124,12 @@ namespace YoloOnnx
         }
         public void PostprocessModel(OrtValue ortTensor, ImagePreprocessModel imageData)
         {
-            float ratio = Math.Min((float)InputWidth / imageData.imageWidth, (float)InputHeight / imageData.imageHeight);
-            var list = PostProcess(ortTensor, _confidenceThres, ratio);
+            var list = PostProcess(ortTensor, _confidenceThres, imageData.Scale, imageData.PadX, imageData.PadY);
             imageData.model.DetectionResult = Utils.GetResult(list);
         }
-        private void GetChwArr(Mat paddedImg, float[] data)
-        {
-            int height = paddedImg.Height;
-            int width = paddedImg.Width;
-            int channels = paddedImg.Channels();
-            int index = 0;
-            for (int c = 0; c < channels; c++)          // 通道（R=0, G=1, B=2）
-            {
-                for (int h = 0; h < height; h++)  // 高度
-                {
-                    for (int w = 0; w < width; w++)  // 宽度
-                    {
-                        var vec = paddedImg.At<Vec3b>(h, w);
-                        data[index++] = (vec[c] / 255.0f);
-                    }
-                }
-            }
-        }
 
-        public List<Detection> PostProcess(OrtValue outputValue, float threshold, float ratio)
+
+        public List<Detection> PostProcess(OrtValue outputValue, float threshold, float scale, int padx, int pady)
         {
             var detections = new List<Detection>();
 
@@ -171,10 +154,10 @@ namespace YoloOnnx
 
                 // 3. 提取坐标并还原到原始图像尺寸
                 // 注意：YOLOv26 默认输出通常是 [x1, y1, x2, y2]
-                float x1 = data[offset + 0] / ratio;
-                float y1 = data[offset + 1] / ratio;
-                float x2 = data[offset + 2] / ratio;
-                float y2 = data[offset + 3] / ratio;
+                float x1 = (data[offset + 0] - padx) / scale;
+                float y1 = (data[offset + 1] - pady) / scale;
+                float x2 = (data[offset + 2] - padx) / scale;
+                float y2 = (data[offset + 3] - pady) / scale;
 
                 int labelId = (int)data[offset + 5];
 

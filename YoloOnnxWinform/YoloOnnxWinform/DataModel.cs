@@ -63,5 +63,5 @@ namespace YoloOnnxWinform
     }
 
 
-    public record ImagePreprocessModel(int imageHeight, int imageWidth, DataModel model, float[] Data, int TopPad, int LeftPad);
+    public record ImagePreprocessModel(int imageHeight, int imageWidth, DataModel model, float[] Data, int PadY, int PadX,float Scale);
 }

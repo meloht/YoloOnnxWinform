@@ -243,7 +243,7 @@ namespace YoloOnnxWinform.YoloOnnx
 
         public void Postprocess(Tensor<float> ortTensor, ImagePreprocessModel imageData)
         {
-            var list = Postprocess(imageData.imageHeight, imageData.imageWidth, ortTensor, imageData.TopPad, imageData.LeftPad);
+            var list = Postprocess(imageData.imageHeight, imageData.imageWidth, ortTensor, imageData.PadY, imageData.PadX);
             imageData.model.DetectionResult = Utils.GetResult(list);
         }
 

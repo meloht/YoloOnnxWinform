@@ -8,14 +8,16 @@ namespace YoloOnnx
     public struct PreImageData
     {
         public Mat LetterboxImg { get; set; }
-        public int TopPad { get; set; }
-        public int LeftPad { get; set; }
+        public int PadY { get; set; }
+        public int PadX { get; set; }
+        public float Scale { get; set; }
 
-        public PreImageData(Mat letterboxImg, int topPad, int leftPad)
+        public PreImageData(Mat letterboxImg, int padY, int padX,float scale)
         {
             LetterboxImg = letterboxImg;
-            TopPad = topPad;
-            LeftPad = leftPad;
+            PadY = padY;
+            PadX = padX;
+            Scale = scale;
         }
     }
 

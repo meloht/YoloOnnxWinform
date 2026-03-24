@@ -10,11 +10,13 @@ namespace YoloOnnx
 
         public int TopPad { get; set; }
         public int LeftPad { get; set; }
-        public PreResult(float[] outData, int topPad, int leftPad)
+        public float Scale { get; set; }
+        public PreResult(float[] outData, int topPad, int leftPad, float scale)
         {
             OutData = outData;
             TopPad = topPad;
             LeftPad = leftPad;
+            Scale = scale;
         }
     }
 }

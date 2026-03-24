@@ -152,7 +152,7 @@ namespace YoloOnnxWinform.YoloOnnx
             int padH = (InputHeight - newImgH) / 2; // 上下填充的一半
 
             // 5. 缩放图像（若原始尺寸≠缩放后尺寸）
-            using Mat resizedImg = rgbImg;
+            using Mat resizedImg = new Mat();
             if (imgW != newImgW || imgH != newImgH)
             {
                 Cv2.Resize(rgbImg, resizedImg, new OpenCvSharp.Size(newImgW, newImgH), interpolation: InterpolationFlags.Linear);
@@ -178,7 +178,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 throw new Exception($"Letterbox size error! expected (1280,1280)，actual ({letterboxImg.Rows},{letterboxImg.Cols})");
             }
 
-            return new PreImageData(letterboxImg, padH, padW);
+            return new PreImageData(letterboxImg, padH, padW, scale);
         }
 
         protected void OptimizedGetAllChannelData(Mat[] channels, float[] data)
@@ -205,7 +205,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 item.Dispose();
             }
         }
-        private void GetChwArr(Mat paddedImg, float[] data)
+        protected void GetChwArr(Mat paddedImg, float[] data)
         {
             int height = paddedImg.Height;
             int width = paddedImg.Width;
@@ -261,17 +261,12 @@ namespace YoloOnnxWinform.YoloOnnx
             // Letterbox处理
             var res = LetterboxFor1280(inputImage);
 
-            // 归一化并转换为float数组
-            //paddedImg.ConvertTo(paddedImg, MatType.CV_32F, 1.0 / 255.0);
-
-            //// 转换为CHW格式 (3, H, W)
-            //var channels = paddedImg.Split();
-
+         
             GetChwArr(res.LetterboxImg, data);
             //OptimizedGetAllChannelData(channels, data);
             res.LetterboxImg.Dispose();
             // 添加批次维度 (1, 3, H, W)
-            return new PreResult(data, res.TopPad, res.LeftPad);
+            return new PreResult(data, res.PadY, res.PadX, res.Scale);
         }
 
 
@@ -289,7 +284,7 @@ namespace YoloOnnxWinform.YoloOnnx
                 GetChwArr(res.LetterboxImg, data);
 
                 // 添加批次维度 (1, 3, H, W)
-                return new ImagePreprocessModel(inputImage.Height, inputImage.Width, model, data, res.TopPad, res.LeftPad);
+                return new ImagePreprocessModel(inputImage.Height, inputImage.Width, model, data, res.PadY, res.PadX, res.Scale);
             }
 
         }
