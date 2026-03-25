@@ -182,7 +182,7 @@ namespace YoloOnnxWinform.YoloOnnx
         public List<Detection> Run(Mat inputImage)
         {
             // 预处理图像
-            var imgData = Preprocess(inputImage, _inputBuffer);
+            var imgData = Preprocess(inputImage);
 
             using var inputOrtValue = OrtValue.CreateTensorValueFromMemory(imgData.OutData, InputShape);
 
