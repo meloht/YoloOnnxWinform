@@ -24,8 +24,8 @@ namespace YoloOnnxWinform
         {
             switch (yoloWarpperType)
             {
-                //case YoloWarpperType.YoloSharp:
-                //    return new YoloSharpImpl();
+                case YoloWarpperType.YoloSharp:
+                    return new YoloSharpImpl();
                 case YoloWarpperType.YoloDotNet:
                     return new YoloDotNetImpl();
                 case YoloWarpperType.YoloDetect:
