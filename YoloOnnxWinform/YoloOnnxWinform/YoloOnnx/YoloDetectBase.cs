@@ -216,6 +216,48 @@ namespace YoloOnnxWinform.YoloOnnx
             return new PreResult(_inputBuffer, padH, padW, scale);
         }
 
+        protected PreResult PreprocessImg(Mat inputImage)
+        {
+
+            // 1. 获取原始图像尺寸
+            int imgH = inputImage.Height;
+            int imgW = inputImage.Width;
+
+            // 2. 计算缩放比例（按最小比例缩放，避免图像畸变）
+            float scale = Math.Min((float)InputHeight / imgH, (float)InputWidth / imgW);
+
+            // 3. 计算缩放后的尺寸（确保按比例缩放）
+            int newImgW = (int)Math.Round(imgW * scale);
+            int newImgH = (int)Math.Round(imgH * scale);
+
+            // 4. 计算填充值（左右填充、上下填充，确保最终尺寸=1280×1280）
+            int padW = (InputWidth - newImgW) / 2; // 左右填充的一半
+            int padH = (InputHeight - newImgH) / 2; // 上下填充的一半
+                                                               // BGR转RGB
+
+            // 5. 缩放图像（若原始尺寸≠缩放后尺寸）
+            using var resizedImg = new Mat();
+            Cv2.Resize(inputImage, resizedImg, new OpenCvSharp.Size(newImgW, newImgH), interpolation: InterpolationFlags.Linear);
+
+            Cv2.CvtColor(resizedImg, resizedImg, ColorConversionCodes.BGR2RGB);
+
+            Cv2.CopyMakeBorder(
+               src: resizedImg,
+               dst: resizedImg,
+               top: padH,        // 顶部填充
+               bottom: InputHeight - newImgH - padH, // 底部填充（补全到 1280）
+               left: padW,       // 左侧填充
+               right: InputWidth - newImgW - padW,  // 右侧填充（补全到 1280）
+               borderType: BorderTypes.Constant,
+               value: _paddingColor // 填充色（BGR 格式）
+           );
+
+            GetChwArr(resizedImg, _inputBuffer);
+
+            // 添加批次维度 (1, 3, H, W)
+            return new PreResult(_inputBuffer, padH, padW, scale);
+        }
+
         protected void OptimizedGetAllChannelData(Mat[] channels, float[] data)
         {
             if (channels == null || channels.Length == 0)
@@ -240,19 +282,25 @@ namespace YoloOnnxWinform.YoloOnnx
                 item.Dispose();
             }
         }
-        protected void GetChwArr(Mat paddedImg, float[] data)
+        public void GetChwArr(Mat paddedImg, float[] data)
         {
             int height = paddedImg.Height;
             int width = paddedImg.Width;
             int channels = paddedImg.Channels();
-            int index = 0;
-            for (int c = 0; c < channels; c++)          // 通道（R=0, G=1, B=2）
+
+            unsafe
             {
-                for (int h = 0; h < height; h++)  // 高度
+                int index = 0;
+                byte* ptr = (byte*)paddedImg.DataPointer;
+                for (int c = 0; c < channels; c++)
                 {
-                    for (int w = 0; w < width; w++)  // 宽度
+                    for (int y = 0; y < height; y++)
                     {
-                        data[index++] = (float)paddedImg.At<Vec3b>(h, w)[c] / 255.0f;
+                        for (int x = 0; x < width; x++)
+                        {
+                            data[index++] = ptr[(y * width + x) * channels + c] / 255.0f;
+                        }
+
                     }
                 }
             }
