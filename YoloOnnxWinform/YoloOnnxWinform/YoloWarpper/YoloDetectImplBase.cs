@@ -17,7 +17,7 @@ namespace YoloOnnxWinform.YoloWarpper
             var data = yoloPredictor.Run(inputImage);
             return Utils.GetResult(data);
         }
-       
+
         protected void Dispose(IYoloDetect yoloPredictor)
         {
             yoloPredictor?.Dispose();
@@ -25,9 +25,22 @@ namespace YoloOnnxWinform.YoloWarpper
         protected string SaveImage(FileRowItem item, IYoloDetect yoloPredictor)
         {
             using Mat inputImage = Cv2.ImRead(item.FilePath);
-         
+
             var result = yoloPredictor.Run(inputImage);
             yoloPredictor.DrawDetections(inputImage, result);
+
+            return SaveImagePath(inputImage, item);
+        }
+
+        protected string SaveImagePath(Mat inputImage, FileRowItem item)
+        {
+            string path = GetSavePath(item);
+            Cv2.ImWrite(path, inputImage);
+            return path;
+        }
+
+        protected string GetSavePath(FileRowItem item)
+        {
             string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
             if (!Directory.Exists(folder))
             {
@@ -38,8 +51,8 @@ namespace YoloOnnxWinform.YoloWarpper
             {
                 File.Delete(path);
             }
-            Cv2.ImWrite(path, inputImage);
             return path;
         }
+
     }
 }

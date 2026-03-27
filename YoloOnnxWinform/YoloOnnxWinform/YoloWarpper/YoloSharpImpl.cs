@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace YoloOnnxWinform.YoloWarpper
 {
-    public class YoloSharpImpl : IYoloModel
+    public class YoloSharpImpl : YoloDetectImplBase, IYoloModel
     {
         private YoloPredictor _yoloPredictor;
 
@@ -46,16 +46,7 @@ namespace YoloOnnxWinform.YoloWarpper
             using var plot = result.PlotImage(image);
             if (plot != null)
             {
-                string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
-                if (!Directory.Exists(folder))
-                {
-                    Directory.CreateDirectory(folder);
-                }
-                string path = Path.Combine(folder, item.FileName);
-                if (File.Exists(path))
-                {
-                    File.Delete(path);
-                }
+                string path = GetSavePath(item);
                 plot.Save(path);
                 return path;
             }

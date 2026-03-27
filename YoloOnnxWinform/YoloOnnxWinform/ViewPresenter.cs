@@ -13,6 +13,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YoloOnnxWinform.YoloWarpper;
+using YoloSharpOnnx;
+using YoloWarpper;
 
 
 namespace YoloOnnxWinform
@@ -154,7 +156,9 @@ namespace YoloOnnxWinform
 
         }
 
+      
 
+       
 
         private void GetDetectResult(IYoloModel yoloPredictor, DataModel model, string filePath)
         {

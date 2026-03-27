@@ -16,7 +16,7 @@ using YoloDotNet.Models;
 namespace YoloOnnxWinform.YoloWarpper
 {
 
-    public class YoloDotNetImpl : IYoloModel
+    public class YoloDotNetImpl : YoloDetectImplBase, IYoloModel
     {
         private Yolo yoloPredictor;
         private DetectionDrawingOptions _drawingOptions;
@@ -75,7 +75,7 @@ namespace YoloOnnxWinform.YoloWarpper
                     model: modelPath,
 
                     // GPU device Id to use for inference. -1 = CPU, 0+ = GPU device Id.
-                    gpuId: 1
+                    gpuId: 0
 
                     // Optional configuration for TensorRT execution.
                     // Executes inference using NVIDIA TensorRT for highly optimized GPU acceleration.
@@ -97,16 +97,7 @@ namespace YoloOnnxWinform.YoloWarpper
             // Draw results
             image.Draw(results, _drawingOptions);
 
-            string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-            string path = Path.Combine(folder, item.FileName);
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
+            string path = GetSavePath(item);
 
             // Save image
             image.Save(path, SKEncodedImageFormat.Jpeg, 100);

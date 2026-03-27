@@ -13,6 +13,7 @@ namespace YoloOnnxWinform
     {
         YoloSharp,
         YoloDotNet,
+        YoloSharpOnnx,
         YoloDetect,
         YoloDetectOrt,
         YoloDetectOrtIoBind
