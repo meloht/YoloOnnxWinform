@@ -204,11 +204,11 @@ namespace YoloOnnxWinform.YoloOnnx
             int padH = (InputHeight - newImgH) / 2; // 上下填充的一半
 
             // 5. 缩放图像（若原始尺寸≠缩放后尺寸）
-            using var resizedImg = new Mat();
-            Cv2.Resize(rgbImg, resizedImg, new OpenCvSharp.Size(newImgW, newImgH), interpolation: InterpolationFlags.Linear);
+            //using var resizedImg = new Mat();
+            Cv2.Resize(rgbImg, rgbImg, new OpenCvSharp.Size(newImgW, newImgH), interpolation: InterpolationFlags.Linear);
 
             using var canvas = new Mat(new OpenCvSharp.Size(InputWidth, InputHeight), MatType.CV_8UC3, _paddingColor);
-            resizedImg.CopyTo(canvas[new Rect(padW, padH, newImgW, newImgH)]);
+            rgbImg.CopyTo(canvas[new Rect(padW, padH, newImgW, newImgH)]);
 
             GetChwArr(canvas, _inputBuffer);
 

@@ -25,7 +25,7 @@ namespace YoloOnnxWinform
         {
             InitializeComponent();
             _viewPresenter = new ViewPresenter(this);
-            _yoloPredictor = YoloFactory.Create(YoloWarpperType.YoloSharpOnnx);
+            _yoloPredictor = YoloFactory.Create(YoloWarpperType.YoloDetectOrt);
         }
 
         private void FormYoloDetect_Load(object sender, EventArgs e)
