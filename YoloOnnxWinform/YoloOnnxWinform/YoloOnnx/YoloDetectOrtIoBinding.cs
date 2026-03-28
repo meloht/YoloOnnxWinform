@@ -102,6 +102,7 @@ namespace YoloOnnx
             _runOptions.Dispose();
             _inputNativeAllocation.Dispose();
             _outputNativeAllocation.Dispose();
+            _resizedImg.Dispose();
             GC.SuppressFinalize(this);
         }
 

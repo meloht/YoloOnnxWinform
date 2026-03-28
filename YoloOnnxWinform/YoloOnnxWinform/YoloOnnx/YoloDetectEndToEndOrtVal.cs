@@ -57,6 +57,7 @@ namespace YoloOnnx
             StopLoad();
             _session.Dispose();
             _options.Dispose();
+            _resizedImg.Dispose();
             GC.SuppressFinalize(this);
         }
 

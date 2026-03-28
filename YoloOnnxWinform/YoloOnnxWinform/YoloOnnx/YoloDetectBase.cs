@@ -30,12 +30,14 @@ namespace YoloOnnxWinform.YoloOnnx
         private volatile bool _isStart = true;
         protected BindingList<DataModel> _listName = new BindingList<DataModel>();
         protected Dictionary<string, string> _dict = new Dictionary<string, string>();
+        protected Mat _resizedImg;
         protected int _len = 0;
 
         int _idx = 0;
         public YoloDetectBase()
         {
             _paddingColor = new Scalar(114, 114, 114);
+            _resizedImg = new Mat();
         }
 
         protected void Start()
@@ -233,17 +235,17 @@ namespace YoloOnnxWinform.YoloOnnx
             // 4. 计算填充值（左右填充、上下填充，确保最终尺寸=1280×1280）
             int padW = (InputWidth - newImgW) / 2; // 左右填充的一半
             int padH = (InputHeight - newImgH) / 2; // 上下填充的一半
-                                                               // BGR转RGB
+                                                    // BGR转RGB
 
             // 5. 缩放图像（若原始尺寸≠缩放后尺寸）
-            using var resizedImg = new Mat();
-            Cv2.Resize(inputImage, resizedImg, new OpenCvSharp.Size(newImgW, newImgH), interpolation: InterpolationFlags.Linear);
+           // using var resizedImg = new Mat();
+            Cv2.Resize(inputImage, _resizedImg, new OpenCvSharp.Size(newImgW, newImgH), interpolation: InterpolationFlags.Linear);
 
-            Cv2.CvtColor(resizedImg, resizedImg, ColorConversionCodes.BGR2RGB);
+            Cv2.CvtColor(_resizedImg, _resizedImg, ColorConversionCodes.BGR2RGB);
 
             Cv2.CopyMakeBorder(
-               src: resizedImg,
-               dst: resizedImg,
+               src: _resizedImg,
+               dst: _resizedImg,
                top: padH,        // 顶部填充
                bottom: InputHeight - newImgH - padH, // 底部填充（补全到 1280）
                left: padW,       // 左侧填充
@@ -252,7 +254,7 @@ namespace YoloOnnxWinform.YoloOnnx
                value: _paddingColor // 填充色（BGR 格式）
            );
 
-            GetChwArr(resizedImg, _inputBuffer);
+            GetChwArr(_resizedImg, _inputBuffer);
 
             // 添加批次维度 (1, 3, H, W)
             return new PreResult(_inputBuffer, padH, padW, scale);
