@@ -25,6 +25,7 @@ namespace YoloOnnxWinform
 
         protected BindingList<DataModel> _bindingSource = new BindingList<DataModel>();
         protected Dictionary<string, string> _dictFile = [];
+        protected Dictionary<string, DataModel> _dictPathFile = [];
         private System.Diagnostics.Stopwatch _stopwatch = new System.Diagnostics.Stopwatch();
 
 
@@ -36,6 +37,7 @@ namespace YoloOnnxWinform
         public void InitDataGridColumn(List<string> files, Dictionary<string, string> dict)
         {
             _dictFile.Clear();
+            _dictPathFile.Clear();
             _dictFile = dict;
             _bindingSource.Clear();
             SetDataGridColumns();
@@ -43,6 +45,8 @@ namespace YoloOnnxWinform
             {
                 DataModel model = new DataModel();
                 model.FileName = fileName;
+                model.FileFullName = dict[fileName];
+                _dictPathFile.Add(model.FileFullName, model);
                 _bindingSource.Add(model);
             }
             if (_bindingSource.Count == 0)
@@ -72,6 +76,7 @@ namespace YoloOnnxWinform
             AddColumn("FileName", 350, _formProgress.DataGridList);
             AddColumn("DetectionResult", 240, _formProgress.DataGridList);
             AddColumn("ExecuteTime", 200, _formProgress.DataGridList);
+            AddColumn("FileFullName", 350, _formProgress.DataGridList);
             AddColumn("ErrorLog", 400, _formProgress.DataGridList);
 
         }
@@ -83,11 +88,19 @@ namespace YoloOnnxWinform
 
                 ProcessParallel(yoloPredictor);
             }
+            else if (yoloPredictor is YoloSharpOnnxImpl && ExcuteType.Parallel == excuteType)
+            {
+                ProcessParallelOnnx(yoloPredictor);
+            }
+            else if (yoloPredictor is YoloDotNetImpl && ExcuteType.Parallel == excuteType)
+            {
+                ProcessYoloDotNetParallel(yoloPredictor);
+            }
             else
             {
                 ProcessSequence(yoloPredictor);
             }
-           
+
         }
 
         private void ProcessSequence(IYoloModel yoloPredictor)
@@ -121,7 +134,31 @@ namespace YoloOnnxWinform
 
             _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");
         }
+        private void ProcessYoloDotNetParallel(IYoloModel yoloPredictor)
+        {
+            int idx = 0;
+            int total = _bindingSource.Count;
 
+
+            Parallel.ForEach(_bindingSource, item =>
+            {
+                try
+                {
+                    string filePath = _dictFile[item.FileName];
+                    GetDetectResult(yoloPredictor, item, filePath);
+                    _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");
+
+                }
+                catch (Exception ex)
+                {
+                    ShowError(item, ex.Message);
+                }
+
+                Interlocked.Increment(ref idx);
+            });
+
+            _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");
+        }
         private void ProcessParallel(IYoloModel yoloPredictor)
         {
             IYoloParallel yolo = (IYoloParallel)yoloPredictor;
@@ -155,10 +192,40 @@ namespace YoloOnnxWinform
             }
 
         }
+        int _onnxIdx = 0;
+        private void ProcessParallelOnnx(IYoloModel yoloPredictor)
+        {
+            YoloSharpOnnxImpl yolo = (YoloSharpOnnxImpl)yoloPredictor;
+          
+            var list = GetImages();
+         
+            yolo.YoloSharp.RunBatchDetect(list, BatchDetectItemCompleted);
+            _onnxIdx = 0;
 
-      
 
-       
+        }
+
+        private void BatchDetectItemCompleted(YoloSharpOnnx.DataResult.DetectionBatchResult e)
+        {
+            long cost= DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - e.StartTimestamp;
+            Interlocked.Increment(ref _onnxIdx);
+            var data = _dictPathFile[e.ImagePath];
+            data.DetectionResult = YoloUtils.GetResult(e.Results);
+            data.ExecuteTime = $"{cost}ms";
+            _formProgress.ShowProgress(_onnxIdx * 100 / _bindingSource.Count, $"{_onnxIdx}/{_bindingSource.Count}");
+        }
+
+        private List<string> GetImages()
+        {
+            List<string> list = new List<string>();
+            foreach (var item in _bindingSource)
+            {
+                list.Add(item.FileFullName);
+            }
+
+            return list;
+        }
+
 
         private void GetDetectResult(IYoloModel yoloPredictor, DataModel model, string filePath)
         {

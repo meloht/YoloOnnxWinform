@@ -11,9 +11,9 @@ namespace YoloOnnxWinform
 {
     public enum YoloWarpperType
     {
-        YoloSharp,
-        YoloDotNet,
         YoloSharpOnnx,
+        YoloDotNet,
+        YoloSharp,
         YoloDetect,
         YoloDetectOrt,
         YoloDetectOrtIoBind
@@ -27,6 +27,8 @@ namespace YoloOnnxWinform
             {
                 case YoloWarpperType.YoloSharp:
                     return new YoloSharpImpl();
+                case YoloWarpperType.YoloSharpOnnx:
+                    return new YoloSharpOnnxImpl();
                 case YoloWarpperType.YoloDotNet:
                     return new YoloDotNetImpl();
                 case YoloWarpperType.YoloDetect:

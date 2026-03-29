@@ -24,13 +24,15 @@ namespace YoloOnnxWinform
         public FormYoloDetect()
         {
             InitializeComponent();
+            this.comboBoxMode.SelectedIndex = 0;
+            this.comboBoxYolo.SelectedIndex = 0;
+
             _viewPresenter = new ViewPresenter(this);
-            _yoloPredictor = YoloFactory.Create(YoloWarpperType.YoloSharpOnnx);
         }
 
         private void FormYoloDetect_Load(object sender, EventArgs e)
         {
-            _yoloPredictor.LoadModel("best.onnx", 0.25f, 0.4f);
+            LoadModel();
         }
 
         private void btnSelectDir_Click(object sender, EventArgs e)
@@ -71,7 +73,8 @@ namespace YoloOnnxWinform
 
                 _stopwatch.Start();
                 LoadImages(this.textboxDir.Text.Trim());
-                ProcessImage();
+                ExcuteType excuteType = GetExcuteType();
+                ProcessImage(excuteType);
             }
             catch (Exception ex)
             {
@@ -79,11 +82,11 @@ namespace YoloOnnxWinform
             }
         }
 
-        private void ProcessImage()
+        private void ProcessImage(ExcuteType excuteType)
         {
             Task.Run(() =>
             {
-                _viewPresenter.Process(_yoloPredictor, ExcuteType.Sequence);
+                _viewPresenter.Process(_yoloPredictor, excuteType);
             });
         }
 
@@ -168,6 +171,8 @@ namespace YoloOnnxWinform
         {
             this.btnAly.Enabled = bl;
             this.btnSelectDir.Enabled = bl;
+            this.comboBoxMode.Enabled = bl;
+            this.comboBoxYolo.Enabled = bl;
             this.showImageToolStripMenuItem.Enabled = bl;
         }
 
@@ -218,6 +223,57 @@ namespace YoloOnnxWinform
             {
                 _yoloPredictor.Dispose();
             }
+        }
+
+        private void comboBoxYolo_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            LoadModel();
+        }
+
+      
+
+        private YoloWarpperType GetYoloType()
+        {
+            string item = this.comboBoxYolo.SelectedItem.ToString();
+            switch (item)
+            {
+                case "YoloSharpOnnx":
+                    return YoloWarpperType.YoloSharpOnnx;
+                case "YoloDotNet":
+                    return YoloWarpperType.YoloDotNet;
+                case "YoloSharp":
+                    return YoloWarpperType.YoloSharp;
+                case "YoloDetectOrt":
+                    return YoloWarpperType.YoloDetectOrt;
+                case "YoloDetect":
+                    return YoloWarpperType.YoloDetect;
+                case "YoloDetectOrtIoBind":
+                    return YoloWarpperType.YoloDetectOrtIoBind;
+                default:
+                    return YoloWarpperType.YoloSharpOnnx;
+            }
+        }
+        private ExcuteType GetExcuteType()
+        {
+            string item = this.comboBoxMode.SelectedItem.ToString();
+            switch (item)
+            {
+                case "Sequence":
+                    return ExcuteType.Sequence;
+                case "Parallel":
+                    return ExcuteType.Parallel;
+                default:
+                    return ExcuteType.Sequence;
+            }
+        }
+        private void LoadModel()
+        {
+            _yoloPredictor?.Dispose();
+            YoloWarpperType yoloWarpperType = GetYoloType();
+           
+            _yoloPredictor = YoloFactory.Create(yoloWarpperType);
+            _yoloPredictor.LoadModel("best.onnx", 0.25f, 0.4f);
+
         }
     }
 }

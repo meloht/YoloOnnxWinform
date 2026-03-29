@@ -31,6 +31,8 @@
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormYoloDetect));
             panel1 = new Panel();
+            comboBoxMode = new ComboBox();
+            comboBoxYolo = new ComboBox();
             lblTimeCost = new Label();
             btnAly = new Button();
             label1 = new Label();
@@ -53,6 +55,8 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(comboBoxMode);
+            panel1.Controls.Add(comboBoxYolo);
             panel1.Controls.Add(lblTimeCost);
             panel1.Controls.Add(btnAly);
             panel1.Controls.Add(label1);
@@ -62,14 +66,37 @@
             panel1.Location = new Point(0, 0);
             panel1.Margin = new Padding(2, 3, 2, 3);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1116, 49);
+            panel1.Size = new Size(1249, 49);
             panel1.TabIndex = 0;
+            // 
+            // comboBoxMode
+            // 
+            comboBoxMode.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            comboBoxMode.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxMode.FormattingEnabled = true;
+            comboBoxMode.Items.AddRange(new object[] { "Sequence", "Parallel" });
+            comboBoxMode.Location = new Point(795, 12);
+            comboBoxMode.Name = "comboBoxMode";
+            comboBoxMode.Size = new Size(121, 25);
+            comboBoxMode.TabIndex = 6;
+            // 
+            // comboBoxYolo
+            // 
+            comboBoxYolo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            comboBoxYolo.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxYolo.FormattingEnabled = true;
+            comboBoxYolo.Items.AddRange(new object[] { "YoloSharpOnnx", "YoloDotNet", "YoloSharp", "YoloDetect", "YoloDetectOrt", "YoloDetectOrtIoBind" });
+            comboBoxYolo.Location = new Point(668, 12);
+            comboBoxYolo.Name = "comboBoxYolo";
+            comboBoxYolo.Size = new Size(121, 25);
+            comboBoxYolo.TabIndex = 5;
+            comboBoxYolo.SelectedIndexChanged += comboBoxYolo_SelectedIndexChanged;
             // 
             // lblTimeCost
             // 
             lblTimeCost.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lblTimeCost.AutoSize = true;
-            lblTimeCost.Location = new Point(998, 17);
+            lblTimeCost.Location = new Point(1131, 17);
             lblTimeCost.Margin = new Padding(2, 0, 2, 0);
             lblTimeCost.Name = "lblTimeCost";
             lblTimeCost.Size = new Size(80, 17);
@@ -79,12 +106,12 @@
             // btnAly
             // 
             btnAly.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnAly.Location = new Point(766, 13);
+            btnAly.Location = new Point(921, 11);
             btnAly.Margin = new Padding(2, 3, 2, 3);
             btnAly.Name = "btnAly";
-            btnAly.Size = new Size(109, 26);
+            btnAly.Size = new Size(87, 26);
             btnAly.TabIndex = 3;
-            btnAly.Text = "Analyse";
+            btnAly.Text = "Execute";
             btnAly.UseVisualStyleBackColor = true;
             btnAly.Click += btnAly_Click;
             // 
@@ -92,7 +119,7 @@
             // 
             label1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             label1.AutoSize = true;
-            label1.Location = new Point(879, 17);
+            label1.Location = new Point(1012, 17);
             label1.Margin = new Padding(2, 0, 2, 0);
             label1.Name = "label1";
             label1.Size = new Size(117, 17);
@@ -102,10 +129,10 @@
             // btnSelectDir
             // 
             btnSelectDir.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnSelectDir.Location = new Point(581, 13);
+            btnSelectDir.Location = new Point(505, 11);
             btnSelectDir.Margin = new Padding(2, 3, 2, 3);
             btnSelectDir.Name = "btnSelectDir";
-            btnSelectDir.Size = new Size(180, 26);
+            btnSelectDir.Size = new Size(158, 26);
             btnSelectDir.TabIndex = 1;
             btnSelectDir.Text = "Select Images Directory";
             btnSelectDir.UseVisualStyleBackColor = true;
@@ -118,7 +145,7 @@
             textboxDir.Margin = new Padding(2, 3, 2, 3);
             textboxDir.Name = "textboxDir";
             textboxDir.ReadOnly = true;
-            textboxDir.Size = new Size(562, 23);
+            textboxDir.Size = new Size(488, 23);
             textboxDir.TabIndex = 0;
             // 
             // panel2
@@ -126,17 +153,17 @@
             panel2.Controls.Add(lblProgress);
             panel2.Controls.Add(progressBar1);
             panel2.Dock = DockStyle.Bottom;
-            panel2.Location = new Point(0, 585);
+            panel2.Location = new Point(0, 671);
             panel2.Margin = new Padding(2, 3, 2, 3);
             panel2.Name = "panel2";
-            panel2.Size = new Size(1116, 34);
+            panel2.Size = new Size(1249, 34);
             panel2.TabIndex = 1;
             // 
             // lblProgress
             // 
             lblProgress.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lblProgress.AutoSize = true;
-            lblProgress.Location = new Point(1040, 8);
+            lblProgress.Location = new Point(1173, 8);
             lblProgress.Margin = new Padding(2, 0, 2, 0);
             lblProgress.Name = "lblProgress";
             lblProgress.Size = new Size(27, 17);
@@ -149,7 +176,7 @@
             progressBar1.Location = new Point(7, 4);
             progressBar1.Margin = new Padding(2, 3, 2, 3);
             progressBar1.Name = "progressBar1";
-            progressBar1.Size = new Size(1024, 25);
+            progressBar1.Size = new Size(1157, 25);
             progressBar1.TabIndex = 0;
             // 
             // groupBox1
@@ -160,7 +187,7 @@
             groupBox1.Margin = new Padding(2, 3, 2, 3);
             groupBox1.Name = "groupBox1";
             groupBox1.Padding = new Padding(2, 3, 2, 3);
-            groupBox1.Size = new Size(1116, 536);
+            groupBox1.Size = new Size(1249, 622);
             groupBox1.TabIndex = 2;
             groupBox1.TabStop = false;
             groupBox1.Text = "Result";
@@ -180,7 +207,7 @@
             dataGridView1.ReadOnly = true;
             dataGridView1.RowHeadersWidth = 51;
             dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridView1.Size = new Size(1112, 514);
+            dataGridView1.Size = new Size(1245, 600);
             dataGridView1.TabIndex = 0;
             // 
             // contextMenuStrip1
@@ -200,7 +227,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1116, 619);
+            ClientSize = new Size(1249, 705);
             Controls.Add(groupBox1);
             Controls.Add(panel2);
             Controls.Add(panel1);
@@ -236,5 +263,7 @@
         private FolderBrowserDialog folderBrowserDialog1;
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem showImageToolStripMenuItem;
+        private ComboBox comboBoxYolo;
+        private ComboBox comboBoxMode;
     }
 }

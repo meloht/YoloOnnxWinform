@@ -20,6 +20,7 @@ namespace YoloOnnxWinform
         private string _fileName;
         private string _detectionResult;
         private string _executeTime;
+        private string __fileFullName;
         private string _errorLog;
 
         public string FileName
@@ -49,6 +50,16 @@ namespace YoloOnnxWinform
             {
                 _executeTime = value;
                 OnPropertyChanged(nameof(ExecuteTime));
+            }
+        }
+
+        public string FileFullName
+        {
+            get => __fileFullName;
+            set
+            {
+                __fileFullName = value;
+                OnPropertyChanged(nameof(FileFullName));
             }
         }
         public string ErrorLog
