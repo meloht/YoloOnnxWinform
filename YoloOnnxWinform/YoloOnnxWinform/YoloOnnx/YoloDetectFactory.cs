@@ -10,9 +10,9 @@ namespace YoloOnnx
 {
     public class YoloDetectFactory
     {
-        public static IYoloDetect CreateYoloDetect(string modelPath, float confidence, float iou, YoloWarpperType yoloWarpperType)
+        public static IYoloDetect CreateYoloDetect(string modelPath, float confidence, float iou, YoloWarpperType yoloWarpperType, int deviceId)
         {
-            var options = BuildSessionOptions();
+            var options = BuildSessionOptions(deviceId);
 
             var session = new InferenceSession(modelPath, options);
             var metaData = session.ModelMetadata.CustomMetadataMap;
@@ -41,18 +41,18 @@ namespace YoloOnnx
             }
         }
 
-        private static SessionOptions BuildSessionOptions()
+        private static SessionOptions BuildSessionOptions(int deviceId)
         {
             SessionOptions session = new SessionOptions();
             session.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
-            session.EnableCpuMemArena=true;
-            int gpuIdx = GetMainGPU();
-            if (gpuIdx == -1)
-            {
-                return session;
-            }
+            session.EnableCpuMemArena = true;
+            //int gpuIdx = GetMainGPU();
+            //if (gpuIdx == -1)
+            //{
+            //    return session;
+            //}
 
-            session.AppendExecutionProvider_DML(gpuIdx);
+            session.AppendExecutionProvider_DML(deviceId);
             return session;
 
         }

@@ -26,9 +26,9 @@ namespace YoloWarpper
             YoloSharp?.Dispose();
         }
 
-        public void LoadModel(string modelPath, float confidence, float iou)
+        public void LoadModel(string modelPath, float confidence, float iou, int deviceId)
         {
-            YoloSharp = new YoloSharp(confidence, iou, new ExecutionProviderDirectML(modelPath));
+            YoloSharp = new YoloSharp(confidence, iou, new ExecutionProviderDirectML(modelPath, deviceId));
 
         }
 
@@ -42,8 +42,8 @@ namespace YoloWarpper
             return SaveImagePath(inputImage, item);
         }
 
-        
 
-       
+
+
     }
 }

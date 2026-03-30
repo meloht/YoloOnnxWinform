@@ -27,9 +27,9 @@ namespace YoloWarpper
             return yoloPredictor.GetPreLoadImages();
         }
 
-        public void LoadModel(string modelPath, float confidence, float iou)
+        public void LoadModel(string modelPath, float confidence, float iou, int deviceId)
         {
-            yoloPredictor = YoloDetectFactory.CreateYoloDetect(modelPath, confidence, iou, YoloWarpperType.YoloDetectOrtIoBind);
+            yoloPredictor = YoloDetectFactory.CreateYoloDetect(modelPath, confidence, iou, YoloWarpperType.YoloDetectOrtIoBind, deviceId);
         }
 
         public void PreLoadImages(BindingList<DataModel> list, Dictionary<string, string> dict)

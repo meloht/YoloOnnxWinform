@@ -9,7 +9,7 @@ namespace YoloOnnxWinform
 {
     public interface IYoloModel: IDisposable
     {
-        void LoadModel(string modelPath, float confidence, float iou);
+        void LoadModel(string modelPath, float confidence, float iou, int deviceId);
         string SaveImage(FileRowItem item);
         string DetectImage(string imgPath);
     }

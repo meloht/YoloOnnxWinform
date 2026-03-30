@@ -2,6 +2,7 @@
 using Compunet.YoloSharp.Data;
 using Compunet.YoloSharp.Plotting;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -28,13 +29,17 @@ namespace YoloOnnxWinform.YoloWarpper
             _yoloPredictor?.Dispose();
         }
 
-        public void LoadModel(string modelPath, float confidence, float iou)
+        public void LoadModel(string modelPath, float confidence, float iou,int deviceId)
         {
-            _yoloPredictor = new YoloPredictor(modelPath);
+            YoloPredictorOptions options = new YoloPredictorOptions();
+            options.UseCuda = true;
+            options.CudaDeviceId = deviceId;
+
+            _yoloPredictor = new YoloPredictor(modelPath, options);
+
             _yoloPredictor.Configuration.Confidence = confidence;
             _yoloPredictor.Configuration.IoU = iou;
-            _yoloPredictor.Configuration.KeepAspectRatio = true;
-            _yoloPredictor.Configuration.ApplyAutoOrient = true;
+            _yoloPredictor.Configuration.Resampler = KnownResamplers.Triangle;
 
         }
 

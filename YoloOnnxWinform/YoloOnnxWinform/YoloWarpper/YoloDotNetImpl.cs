@@ -45,7 +45,7 @@ namespace YoloOnnxWinform.YoloWarpper
             yoloPredictor?.Dispose();
         }
 
-        public void LoadModel(string modelPath, float confidence, float iou)
+        public void LoadModel(string modelPath, float confidence, float iou, int deviceId)
         {
             _drawingOptions = new DetectionDrawingOptions
             {
@@ -75,7 +75,7 @@ namespace YoloOnnxWinform.YoloWarpper
                     model: modelPath,
 
                     // GPU device Id to use for inference. -1 = CPU, 0+ = GPU device Id.
-                    gpuId: 0
+                    gpuId: deviceId
 
                     // Optional configuration for TensorRT execution.
                     // Executes inference using NVIDIA TensorRT for highly optimized GPU acceleration.

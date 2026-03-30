@@ -32,9 +32,9 @@ namespace YoloOnnxWinform.YoloWarpper
             return yoloPredictor.GetPreLoadImages();
         }
 
-        public void LoadModel(string modelPath, float confidence, float iou)
+        public void LoadModel(string modelPath, float confidence, float iou, int deviceId)
         {
-            yoloPredictor = YoloDetectFactory.CreateYoloDetect(modelPath, confidence, iou, YoloWarpperType.YoloDetect);
+            yoloPredictor = YoloDetectFactory.CreateYoloDetect(modelPath, confidence, iou, YoloWarpperType.YoloDetect, deviceId);
         }
 
 
