@@ -21,6 +21,14 @@ namespace YoloWarpper
             return YoloUtils.GetResult(data);
         }
 
+        public async Task<string> DetectImageAsync(string imgPath, IYoloAsync yoloAsync)
+        {
+            using Mat inputImage = Cv2.ImRead(imgPath);
+            var data =await yoloAsync.RunDetectAsync(inputImage);
+            return YoloUtils.GetResult(data);
+        }
+
+
         public void Dispose()
         {
             YoloSharp?.Dispose();

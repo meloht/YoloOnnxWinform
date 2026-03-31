@@ -21,7 +21,7 @@ namespace CommImageControl
         {
 
             InitializeComponent();
-            this.pictureBox1.MouseWheel += PictureBox1_MouseWheel;
+            //this.pictureBox1.MouseWheel += PictureBox1_MouseWheel;
             _filePath = filePath;
             this.DoubleBuffered = true;
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer |

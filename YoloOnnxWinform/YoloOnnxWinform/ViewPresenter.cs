@@ -88,9 +88,17 @@ namespace YoloOnnxWinform
 
                 ProcessParallel(yoloPredictor);
             }
-            else if (yoloPredictor is YoloSharpOnnxImpl && ExcuteType.Parallel == excuteType)
+            else if (yoloPredictor is YoloSharpOnnxImpl)
             {
-                ProcessParallelOnnx(yoloPredictor);
+                if (excuteType == ExcuteType.Sequence)
+                {
+                    _ = ProcessSequenceAsync((YoloSharpOnnxImpl)yoloPredictor);
+                }
+                else
+                {
+                    ProcessParallelOnnx(yoloPredictor);
+                }
+
             }
             else if (yoloPredictor is YoloDotNetImpl && ExcuteType.Parallel == excuteType)
             {
@@ -130,6 +138,39 @@ namespace YoloOnnxWinform
                 }
 
                 idx++;
+            }
+
+            _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");
+        }
+
+        private async Task ProcessSequenceAsync(YoloSharpOnnxImpl yoloPredictor)
+        {
+            int idx = 0;
+            int total = _bindingSource.Count;
+
+            using (var yoloAsync = yoloPredictor.YoloSharp.CreateAsyncChannel())
+            {
+                foreach (var item in _bindingSource)
+                {
+
+                    try
+                    {
+                        string filePath = _dictFile[item.FileName];
+                        _stopwatch.Start();
+                        item.DetectionResult = await yoloPredictor.DetectImageAsync(filePath, yoloAsync);
+                        _stopwatch.Stop();
+                        item.ExecuteTime = $"{_stopwatch.Elapsed.TotalMilliseconds}ms";
+                        _stopwatch.Reset();
+                        _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");
+
+                    }
+                    catch (Exception ex)
+                    {
+                        ShowError(item, ex.Message);
+                    }
+
+                    Interlocked.Increment(ref idx);
+                }
             }
 
             _formProgress.ShowProgress(idx * 100 / total, $"{idx}/{total}");
@@ -196,9 +237,9 @@ namespace YoloOnnxWinform
         private void ProcessParallelOnnx(IYoloModel yoloPredictor)
         {
             YoloSharpOnnxImpl yolo = (YoloSharpOnnxImpl)yoloPredictor;
-          
+
             var list = GetImages();
-         
+
             yolo.YoloSharp.RunBatchDetect(list, BatchDetectItemCompleted);
             _onnxIdx = 0;
 
@@ -207,7 +248,7 @@ namespace YoloOnnxWinform
 
         private void BatchDetectItemCompleted(YoloSharpOnnx.DataResult.DetectionBatchResult e)
         {
-            long cost= DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - e.StartTimestamp;
+            long cost = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - e.StartTimestamp;
             Interlocked.Increment(ref _onnxIdx);
             var data = _dictPathFile[e.ImagePath];
             data.DetectionResult = YoloUtils.GetResult(e.Results);
