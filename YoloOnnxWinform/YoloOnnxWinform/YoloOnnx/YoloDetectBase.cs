@@ -126,12 +126,45 @@ namespace YoloOnnxWinform.YoloOnnx
 
             // 标签背景
             Cv2.Rectangle(img,
-                new OpenCvSharp.Point(labelTop.X - 8, labelTop.Y - 8 - textSize.Height),
+                new OpenCvSharp.Point(labelTop.X - 1, labelTop.Y - 8 - textSize.Height),
                 new OpenCvSharp.Point(labelTop.X + textSize.Width, labelTop.Y + baseline),
                 color, -1);
 
             // 标签文本
             Cv2.PutText(img, label, labelTop, HersheyFonts.HersheySimplex, fontScale, Scalar.White, fontThick, LineTypes.AntiAlias);
+        }
+        public void DrawDetections1(Mat img, Rect box, float score, int classId, string className)
+        {
+            var color = _colorPalette[classId];
+
+            double fontScale = 1.0;
+            // 绘制边界框
+            Cv2.Rectangle(img, box, color, 2);
+
+            int height = img.Height;
+            int width = img.Width;
+
+            // 4. 绘制标签背景（文字更清晰）
+            string text = $"{className} {score:F2}";
+            var textSize = Cv2.GetTextSize(text, HersheyFonts.HersheySimplex, 0.6, 1, out _);
+            var textBgRect = new Rect(
+                box.X,
+                box.Y - textSize.Height - 4,
+                textSize.Width + 4,
+                textSize.Height + 4
+            );
+            Cv2.Rectangle(img, textBgRect, color, -1); // -1表示填充
+
+            // 5. 绘制类别+置信度文字
+            Cv2.PutText(
+                img,
+                text,
+                new OpenCvSharp.Point(box.X + 2, box.Y - 2),
+                HersheyFonts.HersheySimplex,
+                0.6,          // 文字大小
+                Scalar.White, // 文字颜色
+                1             // 文字粗细
+            );
         }
         protected PreImageData LetterboxFor1280(Mat inputImage)
         {
@@ -238,7 +271,7 @@ namespace YoloOnnxWinform.YoloOnnx
                                                     // BGR转RGB
 
             // 5. 缩放图像（若原始尺寸≠缩放后尺寸）
-           // using var resizedImg = new Mat();
+            // using var resizedImg = new Mat();
             Cv2.Resize(inputImage, _resizedImg, new OpenCvSharp.Size(newImgW, newImgH), interpolation: InterpolationFlags.Linear);
 
             Cv2.CvtColor(_resizedImg, _resizedImg, ColorConversionCodes.BGR2RGB);
