@@ -88,16 +88,9 @@ namespace YoloOnnxWinform
 
                 ProcessParallel(yoloPredictor);
             }
-            else if (yoloPredictor is YoloSharpOnnxImpl)
+            else if (yoloPredictor is YoloSharpOnnxImpl&& excuteType == ExcuteType.Parallel)
             {
-                if (excuteType == ExcuteType.Sequence)
-                {
-                    _ = ProcessSequenceAsync((YoloSharpOnnxImpl)yoloPredictor);
-                }
-                else
-                {
-                    ProcessParallelOnnx(yoloPredictor);
-                }
+                ProcessParallelOnnx(yoloPredictor);
 
             }
             else if (yoloPredictor is YoloDotNetImpl && ExcuteType.Parallel == excuteType)
