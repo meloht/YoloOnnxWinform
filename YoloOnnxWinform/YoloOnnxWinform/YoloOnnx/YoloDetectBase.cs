@@ -114,24 +114,24 @@ namespace YoloOnnxWinform.YoloOnnx
             string label = $"{className}: {score:F2}";
             int fontThick = 2;
             var textSize = Cv2.GetTextSize(label, HersheyFonts.HersheySimplex, fontScale, fontThick, out int baseline);
-            var labelTop = new OpenCvSharp.Point(box.X, box.Y - 10);
+            int X = box.X;
+            int Y = box.Y - 10;
+            if (Y < textSize.Height)
+                Y = box.Y + 10;
 
-            if (labelTop.Y < textSize.Height)
-                labelTop.Y = box.Y + 10;
-
-            if (labelTop.X + textSize.Width > width)
+            if (X + textSize.Width > width)
             {
-                labelTop.X = labelTop.X - (labelTop.X + textSize.Width - width) - 4;
+                X = X - (X + textSize.Width - width) - 4;
             }
 
             // 标签背景
             Cv2.Rectangle(img,
-                new OpenCvSharp.Point(labelTop.X - 1, labelTop.Y - 8 - textSize.Height),
-                new OpenCvSharp.Point(labelTop.X + textSize.Width, labelTop.Y + baseline),
+                new OpenCvSharp.Point(X - 1, Y - 8 - textSize.Height),
+                new OpenCvSharp.Point(X + textSize.Width, Y + baseline),
                 color, -1);
 
             // 标签文本
-            Cv2.PutText(img, label, labelTop, HersheyFonts.HersheySimplex, fontScale, Scalar.White, fontThick, LineTypes.AntiAlias);
+            Cv2.PutText(img, label, new OpenCvSharp.Point(X + 1, Y), HersheyFonts.HersheySimplex, fontScale, Scalar.White, fontThick, LineTypes.AntiAlias);
         }
         public void DrawDetections1(Mat img, Rect box, float score, int classId, string className)
         {
