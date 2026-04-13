@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Clipper2" Version="2.0.0" />
-    <PackageReference Include="Meloht.WinFormsViewImage" Version="1.0.1" />
+    <PackageReference Include="Meloht.WinFormsViewImage" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.3" />
     <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260318" />

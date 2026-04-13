@@ -195,7 +195,7 @@ namespace YoloOnnxWinform
                     string path = _yoloPredictor.SaveImage(item);
                     if (!string.IsNullOrEmpty(path))
                     {
-                        FormImageViewUtils.ShowDialog(item.FileName, path, DeleteImageFile);
+                        FormImageViewUtils.Show(item.FileName, path, DeleteImageFile);
                     }
                 }
             }
