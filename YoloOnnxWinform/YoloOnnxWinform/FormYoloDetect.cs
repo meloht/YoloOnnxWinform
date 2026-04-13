@@ -1,4 +1,5 @@
-﻿using CommImageControl;
+﻿
+using Meloht.WinFormsViewImage;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -194,7 +195,7 @@ namespace YoloOnnxWinform
                     string path = _yoloPredictor.SaveImage(item);
                     if (!string.IsNullOrEmpty(path))
                     {
-                        FormUtils.Show(item.FileName, path);
+                        FormImageViewUtils.ShowDialog(item.FileName, path, DeleteImageFile);
                     }
                 }
             }
@@ -210,6 +211,25 @@ namespace YoloOnnxWinform
 
         }
 
+        private void DeleteImageFile(string imagePath)
+        {
+            if(string.IsNullOrEmpty(imagePath))
+            {
+                return;
+            }
+
+            try
+            {
+                if (File.Exists(imagePath))
+                {
+                    File.Delete(imagePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
         private void FormYoloDetect_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (this.btnAly.Enabled == false)
