@@ -292,7 +292,7 @@ namespace YoloOnnxWinform
             YoloWarpperType yoloWarpperType = GetYoloType();
 
             _yoloPredictor = YoloFactory.Create(yoloWarpperType);
-            _yoloPredictor.LoadModel("best.onnx", 0.25f, 0.4f, 0);
+            _yoloPredictor.LoadModel("best.onnx", 0.25f, 0.4f, 1);
 
         }
     }

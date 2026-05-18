@@ -7,6 +7,7 @@ using System.Text;
 using YoloOnnxWinform;
 using YoloOnnxWinform.YoloWarpper;
 using YoloSharpOnnx;
+using YoloSharpOnnx.DataResult;
 using YoloSharpOnnx.Providers;
 
 namespace YoloWarpper
@@ -18,14 +19,14 @@ namespace YoloWarpper
         {
             using Mat inputImage = Cv2.ImRead(imgPath);
             var data = YoloSharp.RunDetect(inputImage);
-            return YoloUtils.GetResult(data);
+            return data.Summary();
         }
 
         public async Task<string> DetectImageAsync(string imgPath, IYoloAsync yoloAsync)
         {
             using Mat inputImage = Cv2.ImRead(imgPath);
             var data =await yoloAsync.RunDetectAsync(inputImage);
-            return YoloUtils.GetResult(data);
+            return data.Summary();
         }
 
 

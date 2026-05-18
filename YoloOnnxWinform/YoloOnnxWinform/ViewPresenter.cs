@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using YoloOnnxWinform.YoloWarpper;
 using YoloSharpOnnx;
+using YoloSharpOnnx.DataResult;
 using YoloWarpper;
 
 
@@ -88,7 +89,7 @@ namespace YoloOnnxWinform
 
                 ProcessParallel(yoloPredictor);
             }
-            else if (yoloPredictor is YoloSharpOnnxImpl&& excuteType == ExcuteType.Parallel)
+            else if (yoloPredictor is YoloSharpOnnxImpl && excuteType == ExcuteType.Parallel)
             {
                 ProcessParallelOnnx(yoloPredictor);
 
@@ -233,7 +234,7 @@ namespace YoloOnnxWinform
 
             var list = GetImages();
 
-            yolo.YoloSharp.RunBatchDetect(list, BatchDetectItemCompleted);
+            yolo.YoloSharp.RunBatchDetect(list, receiveAction: BatchDetectItemCompleted);
             _onnxIdx = 0;
 
 
@@ -244,7 +245,7 @@ namespace YoloOnnxWinform
             long cost = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - e.StartTimestamp;
             Interlocked.Increment(ref _onnxIdx);
             var data = _dictPathFile[e.ImagePath];
-            data.DetectionResult = YoloUtils.GetResult(e.Results);
+            data.DetectionResult = e.Results.Summary();
             data.ExecuteTime = $"{cost}ms";
             _formProgress.ShowProgress(_onnxIdx * 100 / _bindingSource.Count, $"{_onnxIdx}/{_bindingSource.Count}");
         }
