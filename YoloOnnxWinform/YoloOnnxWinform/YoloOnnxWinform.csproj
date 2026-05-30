@@ -23,7 +23,7 @@
     <PackageReference Include="System.Management" Version="10.0.8" />
     <PackageReference Include="YoloDotNet" Version="4.2.0" />
     <PackageReference Include="YoloDotNet.ExecutionProvider.DirectML" Version="1.0.0" />
-    <PackageReference Include="YoloSharpOnnx" Version="3.2.1" />
+    <PackageReference Include="YoloSharpOnnx" Version="3.2.2" />
   </ItemGroup>
 
   <ItemGroup>
